@@ -22,3 +22,9 @@ namespace BangazonSprint
                 .UseStartup<Startup>();
     }
 }
+
+// Let the record show that :
+// HM = Hunter Metts
+// AB = Austin Blade
+// MR = Mary Remo
+// HMN = Hannah Neal
