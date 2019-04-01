@@ -74,7 +74,7 @@ namespace BangazonSprintStartUp
                 {
                     Name = newName,
                     AcctNumber = 555555555,
-                    CustomerId = 1
+                    CustomerId =1
                 };
                 var modifiedPaymentTypeAsJSON = JsonConvert.SerializeObject(modifiedPaymentType);
 
@@ -86,38 +86,15 @@ namespace BangazonSprintStartUp
 
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-                var getPaymentType = await client.GetAsync("/api/paymenttype/1");
-                getPaymentType.EnsureSuccessStatusCode();
+                var getBlackCard = await client.GetAsync("/api/paymenttype/2");
+                getBlackCard.EnsureSuccessStatusCode();
 
-                string getPaymentTypeBody = await getPaymentType.Content.ReadAsStringAsync();
-                PaymentType newPaymentType = JsonConvert.DeserializeObject<PaymentType>(getPaymentTypeBody);
+                string getBlackCardBody = await getBlackCard.Content.ReadAsStringAsync();
+                PaymentType newBlackCard = JsonConvert.DeserializeObject<PaymentType>(getBlackCardBody);
 
-                Assert.Equal(HttpStatusCode.NoContent, getPaymentType.StatusCode);
-                Assert.Equal(newName, newPaymentType.Name);
+                Assert.Equal(HttpStatusCode.OK, getBlackCard.StatusCode);
+                Assert.Equal(newName, newBlackCard.Name);
             }
         }
-
-        /*[Fact]
-        public async Task Test_Delete_Student()
-        {
-            using (var client = new APIClientProvider().Client)
-            {
-                var response = await client.GetAsync("/api/students/?q=Gucci");
-
-                string yeah = await response.Content.ReadAsStringAsync();
-
-                var letsWork = JsonConvert.DeserializeObject<List<Student>>(yeah);
-
-                var studentResponse = await client.DeleteAsync(
-                    $"/api/students/{letsWork[0].Id}"
-                );
-                string responseBody = await studentResponse.Content.ReadAsStringAsync();
-
-                Assert.Equal(HttpStatusCode.OK, studentResponse.StatusCode);
-
-                var getStudent = await client.GetAsync($"/api/students/{letsWork[0].Id}");
-                getStudent.EnsureSuccessStatusCode();
-            }
-        }*/
     }
 }

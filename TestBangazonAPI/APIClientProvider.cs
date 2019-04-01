@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc.Testing;
 using System.Net.Http;
 using Xunit;
-using BangazonSprintStartup;
+using BangazonSprint;
 
 namespace TestBangazonAPI
 {

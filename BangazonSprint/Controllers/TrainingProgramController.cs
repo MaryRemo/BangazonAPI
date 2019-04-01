@@ -1,4 +1,4 @@
-﻿/*using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -19,7 +19,7 @@ namespace BangazonSprint.Controllers
         }
 
         // GET: api/TrainingProgram/5
-        [HttpGet("{id}", Name = "Get")]
+        [HttpGet("{id}", Name = "GetSingleTrainingProgram")]
         public string Get(int id)
         {
             return "value";
@@ -44,4 +44,3 @@ namespace BangazonSprint.Controllers
         }
     }
 }
-*/
