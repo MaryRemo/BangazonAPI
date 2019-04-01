@@ -50,7 +50,7 @@ public class CustomerController : ControllerBase
 
         // GET: api/Customer
         [HttpGet]
-        public async Task<IActionResult> GetCustomers(string include, string q)
+        public List<Customer> GetCustomers(string include, string q)
         {
             using (SqlConnection conn = Connection)
             {
@@ -59,17 +59,18 @@ public class CustomerController : ControllerBase
                 {
                     if (include == "products")
                     {
-                        cmd.CommandText = $@"SELECT c.FirstName, c.LastName, p.[Title], p.[Description], p.Price, p.Quantity
+                        cmd.CommandText = $@"SELECT c.id AS customerid, c.FirstName, c.LastName, p.id AS productid, p.[Title] AS Title, p.[Description] AS Description,
+                                        p.Price, p.Quantity
                                         FROM Customer c
-                                        JOIN  Product p ON c.Id AS customerid = p.CustomerId
+                                        JOIN  Product p ON c.Id = p.CustomerId
                                         WHERE 1 = 1";
                     }
-                    if(include == "payments")
+                   else if (include == "payments")
                     {
-                        cmd.CommandText = $@"SELECT c.FirstName, c.LastName, pt.[Name], pt.AcctNumber
+                        cmd.CommandText = $@"SELECT c.id AS customerid, c.FirstName, c.LastName, pt.id AS paymentid, pt.[Name], pt.AcctNumber
                                         FROM Customer c
-                                        JOIN PaymentType pt on c.Id AS customerid = pt.CustomerId
-                                        WHERE 1 = 1";   
+                                        JOIN PaymentType pt on c.Id  = pt.CustomerId
+                                        WHERE 1 = 1";
                     }
                     else
                     {
@@ -105,51 +106,53 @@ public class CustomerController : ControllerBase
 
                         if (include == "payments")
                         {
-                            if (!reader.IsDBNull(reader.GetOrdinal("ptId")))
+                            if (!reader.IsDBNull(reader.GetOrdinal("paymentid")))
                             {
                                 Customer currentCustomer = customers[customerid];
-                                currentCustomer.payments.Add(
+                                if (!currentCustomer.payments.Exists(x => x.Id == reader.GetInt32(reader.GetOrdinal("paymentid"))))
+                                {
+                                    currentCustomer.payments.Add(
                                     new PaymentType
                                     {
-                                        Id = reader.GetInt32(reader.GetOrdinal("ptId")),
+                                        Id = reader.GetInt32(reader.GetOrdinal("paymentid")),
                                         AcctNumber = reader.GetInt32(reader.GetOrdinal("AcctNumber")),
                                         Name = reader.GetString(reader.GetOrdinal("Name")),
-                                    }
-                                );
+                                    });
+                                }
                             }
                         }
 
-                            if (include == "products")
+                        if (include == "products")
+                        {
+                            if (!reader.IsDBNull(reader.GetOrdinal("productid")))
                             {
-                                if (!reader.IsDBNull(reader.GetOrdinal("pId")))
+                                Customer currentCustomer = customers[customerid];
+                                if (!currentCustomer.products.Exists(x => x.Id == reader.GetInt32(reader.GetOrdinal("productid"))))
                                 {
-                                    Customer currentCustomer = customers[customerid];
                                     currentCustomer.products.Add(
                                         new Product
                                         {
-                                            Id = reader.GetInt32(reader.GetOrdinal("ptId")),
+                                            Id = reader.GetInt32(reader.GetOrdinal("productid")),
                                             Title = reader.GetString(reader.GetOrdinal("Title")),
                                             Price = reader.GetInt32(reader.GetOrdinal("Price")),
                                             Quantity = reader.GetInt32(reader.GetOrdinal("Quantity")),
-                                            Description = reader.GetString(reader.GetOrdinal("[Description]")),
-                                        }
-                                    );
+                                            Description = reader.GetString(reader.GetOrdinal("Description")),
+                                        });
                                 }
                             }
+                        }
 
                     }
                     reader.Close();
-
-                    return Ok(customers);
+                    return customers.Values.ToList();
                 }
-
             }
         }
 
 
         // GET: api/Customer/5
- /*       [HttpGet("{id}", Name = "GetSingleCustomer")]
-        public string GetCustomer(int id)
+       [HttpGet("{id}", Name = "GetSingleCustomer")]
+        public Customer GetCustomer(int id, string include)
         {
             using (SqlConnection conn = Connection)
 
@@ -157,33 +160,93 @@ public class CustomerController : ControllerBase
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
-                    cmd.CommandText = @" SELECT c.FirstName, c.LastName, p.Title, pt.[Name], pt.AcctNumber
+                    if (include == "payments")
+                    {
+                        cmd.CommandText = $@"SELECT c.id AS customerid, c.FirstName, c.LastName, pt.id AS paymentid, pt.[Name], pt.AcctNumber
                                         FROM Customer c
-                                        JOIN  Product p ON c.Id = p.CustomerId
-										JOIN PaymentType pt on c.Id = pt.CustomerId
+                                        JOIN PaymentType pt on c.Id  = pt.CustomerId
                                     WHERE c.id = @Id";
                     cmd.Parameters.Add(new SqlParameter("@Id", id));
+                    }
+                    else if (include == "products")
+                    {
+                        cmd.CommandText = $@"SELECT c.id AS customerid, c.FirstName, c.LastName, p.id AS productid, p.[Title] AS Title,
+                                        p.[Description] AS Description,
+                                        p.Price, p.Quantity
+                                        FROM Customer c
+                                        JOIN  Product p ON c.Id = p.CustomerId
+                                    WHERE c.id = @Id";
+                        cmd.Parameters.Add(new SqlParameter("@Id", id));
+                    }
+                    else
+                    {
+                        cmd.CommandText = $@"SELECT c.Id AS customerid, c.FirstName, c.LastName
+                                        FROM Customer c
+                                        WHERE c.id = @Id";
+                        cmd.Parameters.Add(new SqlParameter("@Id", id));
+                    }
+
                     SqlDataReader reader = cmd.ExecuteReader();
-                    Customer newCustomer = null;
+
+                    Customer customer = null;
+
                     while (reader.Read())
                     {
-                        Customer customer = new Customer
+                        customer = new Customer
                         {
-                            Id = reader.GetInt32(reader.GetOrdinal("CustomerId")),
+                            Id = reader.GetInt32(reader.GetOrdinal("customerid")),
                             FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
                             LastName = reader.GetString(reader.GetOrdinal("LastName")),
+                            payments = new List<PaymentType>(),
+                            products = new List<Product>(),
+
                         };
 
+                        if (include == "payments")
+                        {
+                            if (!reader.IsDBNull(reader.GetOrdinal("paymentid")))
+                            {      
+                                if (!customer.payments.Exists(x => x.Id == reader.GetInt32(reader.GetOrdinal("paymentid"))))
+                                {
+                                    customer.payments.Add(
+                                    new PaymentType
+                                    {
+                                        Id = reader.GetInt32(reader.GetOrdinal("paymentid")),
+                                        AcctNumber = reader.GetInt32(reader.GetOrdinal("AcctNumber")),
+                                        Name = reader.GetString(reader.GetOrdinal("Name")),
+                                    });
+                                }
+                            }
+                        }
+
+                        if (include == "products")
+                        {
+                            if (!reader.IsDBNull(reader.GetOrdinal("productid")))
+                            {
+                                if (!customer.products.Exists(x => x.Id == reader.GetInt32(reader.GetOrdinal("productid"))))
+                                {
+                                    customer.products.Add(
+                                        new Product
+                                        {
+                                            Id = reader.GetInt32(reader.GetOrdinal("productid")),
+                                            Title = reader.GetString(reader.GetOrdinal("Title")),
+                                            Price = reader.GetInt32(reader.GetOrdinal("Price")),
+                                            Quantity = reader.GetInt32(reader.GetOrdinal("Quantity")),
+                                            Description = reader.GetString(reader.GetOrdinal("Description")),
+                                        });
+                                }
+                            }
+                        }
                     }
                     reader.Close();
-                    return newCustomer;
+                    return customer;
                 }
             }
-        }*/
+        }
 
         // POST: api/Customer
- /*       [HttpPost]
-        public void Post([FromBody] Customer newCustomer)
+       [HttpPost]
+        public async Task<IActionResult> Post([FromBody] Customer newCustomer)
         {
             using (SqlConnection conn = Connection)
             {
@@ -198,12 +261,12 @@ public class CustomerController : ControllerBase
 
                     int newId = (int)cmd.ExecuteScalar();
                     newCustomer.Id = newId;
-                    return CreatedAtRoute("Get", new { id = newId }, newCustomer);
+                    return CreatedAtRoute("GetSingleCustomer", new { id = newId }, newCustomer);
 
                 }
             }
         }
-        */
+        
         // PUT: api/Customer/5
         [HttpPut("{id}")]
         public void Put(int id, [FromBody] Customer customer)
