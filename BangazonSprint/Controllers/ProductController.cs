@@ -163,27 +163,53 @@ namespace BangazonSprint.Controllers
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
                     cmd.CommandText = @"INSERT INTO Product 
-                                            (p.id, 
-                                             p.price, 
-                                             p.slackhandle, cohortid)
-                                             OUTPUT INSERTED.Id
-                                             VALUES (@firstname, @lastname, @slackhandle, @cohortid)";
-                    cmd.Parameters.Add(new SqlParameter("@firstname", newInstructor.FirstName));
-                    cmd.Parameters.Add(new SqlParameter("@lastname", newInstructor.LastName));
-                    cmd.Parameters.Add(new SqlParameter("@slackhandle", newInstructor.SlackHandle));
-                    cmd.Parameters.Add(new SqlParameter("@cohortid", newInstructor.CohortId));
+                                            p.id AS ProductId, 
+                                            p.price AS ProductPrice, 
+                                            p.title AS ProductTitle, 
+                                            p.description AS ProductDescription, 
+                                            p.quantity AS ProductQuantity
+                                        OUTPUT INSERTED.Id
+                                        VALUES (@productPrice, @productTitle, @productDescription, @productQuantity)";
+
+                    //NOTE: Need to add ProductType and CustomerId to query
+
+                    cmd.Parameters.Add(new SqlParameter("@ProductPrice", newProduct.price));
+                    cmd.Parameters.Add(new SqlParameter("@productTitle", newProduct.title));
+                    cmd.Parameters.Add(new SqlParameter("@productDescription", newProduct.description));
+                    cmd.Parameters.Add(new SqlParameter("@productQuantity", newProduct.quantity));
 
                     int newId = (int)cmd.ExecuteScalar();
-                    newInstructor.Id = newId;
-                    return CreatedAtRoute("GetSingleInstructor", new { id = newId }, newInstructor);
+                    newProduct.id = newId;
+                    return CreatedAtRoute("GetSingleProduct", new { id = newId }, newProduct);
                 }
             }
+        }
 
 
         // PUT: api/Product/5
         [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        public void Put(int id, [FromBody] Product product)
         {
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"UPDATE Product
+                                           SET price = @price, 
+                                               title = @title,
+                                               description = @description,
+                                               quantity = @quantity
+                                         WHERE id = @id;";
+
+                    cmd.Parameters.Add(new SqlParameter("@price", product.price));
+                    cmd.Parameters.Add(new SqlParameter("@title", product.title));
+                    cmd.Parameters.Add(new SqlParameter("@description", product.description));
+                    cmd.Parameters.Add(new SqlParameter("@quantity", product.quantity));
+
+                    cmd.ExecuteNonQuery();
+                }
+            }
         }
 
         // DELETE: api/ApiWithActions/5
