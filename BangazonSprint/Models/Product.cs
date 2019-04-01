@@ -23,7 +23,7 @@ namespace BangazonSprint.Models
         public int product_type_id { get; set; }
         public int customer_id { get; set; }
 
-        public ProductType ProductType {get; set; }
-        public Customer Customer { get; set; }
+        //public ProductType ProductType {get; set; }
+        //public Customer Customer { get; set; }
     }
 }

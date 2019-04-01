@@ -92,7 +92,7 @@ namespace BangazonSprint.Controllers
                         {
                             Product product = new Product
                             {
-                                id = reader.GetInt32(reader.GetOrdinal("id")),
+                                id = reader.GetInt32(reader.GetOrdinal("productId")),
                                 price = reader.GetInt32(reader.GetOrdinal("productPrice")),
                                 title = reader.GetString(reader.GetOrdinal("productTitle")),
                                 description = reader.GetString(reader.GetOrdinal("productDescription")),
@@ -216,6 +216,18 @@ namespace BangazonSprint.Controllers
         [HttpDelete("{id}")]
         public void Delete(int id)
         {
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = "DELETE FROM product " +
+                                      "WHERE id = @id;";
+                    cmd.Parameters.Add(new SqlParameter("@id", id));
+
+                    cmd.ExecuteNonQuery();
+                }
+            }
         }
     }
 }
