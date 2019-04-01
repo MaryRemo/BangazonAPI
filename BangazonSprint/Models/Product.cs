@@ -8,7 +8,7 @@ namespace BangazonSprint.Models
 {
     public class Product
     {
-
+        public int id { get; set; }
         public int price { get; set; }
 
         //[Required]

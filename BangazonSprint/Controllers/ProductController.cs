@@ -17,7 +17,7 @@ namespace BangazonSprint.Controllers
     {
         private readonly IConfiguration _config;
 
-        public CohortController(IConfiguration config)
+        public ProductController(IConfiguration config)
         {
             _config = config;
         }
@@ -30,11 +30,9 @@ namespace BangazonSprint.Controllers
             }
         }
 
-
-
         // GET: api/Product
-        //NOTE: The ProductType model has not been set up yet but it should be included in the query for GetAllProducts. When ProductTpye has been established, add to this query.
-        //NOTE:  MR is working on Customer model; the customer_id should be included in this query. 
+        //NOTE: HMN: The ProductType model has not been set up yet but it should be included in the query for GetAllProducts. When ProductType has been established, add to this query.
+        //NOTE:  HMN: MR is working on Customer model; the customer_id should be included in this query. 
 
         [HttpGet]
         public List<Product> GetAllProducts(string q)
@@ -46,7 +44,65 @@ namespace BangazonSprint.Controllers
                 {
                     if (q != null)
                     {
-                        cmd.CommandText = $@"SELECT p.id AS ProductId, p.price AS ProductPrice, p.title AS ProductTitle, p.description AS ProductDescription, p.quantity AS ProductQuantity"
+                        cmd.CommandText = $@"SELECT 
+                                                p.id AS ProductId, 
+                                                p.price AS ProductPrice, 
+                                                p.title AS ProductTitle, 
+                                                p.description AS ProductDescription, 
+                                                p.quantity AS ProductQuantity
+                                            FROM Product p";
+
+                        //NOTE:HMN:  ProductType and CustomerId need to be added to the query!!!
+
+                        cmd.Parameters.Add(new SqlParameter("@q", $"%{q}%"));
+                        SqlDataReader reader = cmd.ExecuteReader();
+
+                        List<Product> products = new List<Product>();
+                        while (reader.Read())
+                        {
+                            Product product = new Product
+                            {
+                                id = reader.GetInt32(reader.GetOrdinal("id")),
+                                price = reader.GetInt32(reader.GetOrdinal("productPrice")),
+                                title = reader.GetString(reader.GetOrdinal("productTitle")),
+                                description = reader.GetString(reader.GetOrdinal("productDescription")),
+                                quantity = reader.GetInt32(reader.GetOrdinal("productQuantity"))
+                            };
+
+                            products.Add(product);
+                        }
+
+                        reader.Close();
+                        return products;
+                    }
+                    else
+                    {
+                        cmd.CommandText = $@"SELECT 
+                                                p.id AS ProductId, 
+                                                p.price AS ProductPrice, 
+                                                p.title AS ProductTitle, 
+                                                p.description AS ProductDescription, 
+                                                p.quantity AS ProductQuantity
+                                            FROM Product p";
+                        SqlDataReader reader = cmd.ExecuteReader();
+
+                        List<Product> products = new List<Product>();
+
+                        while (reader.Read())
+                        {
+                            Product product = new Product
+                            {
+                                id = reader.GetInt32(reader.GetOrdinal("id")),
+                                price = reader.GetInt32(reader.GetOrdinal("productPrice")),
+                                title = reader.GetString(reader.GetOrdinal("productTitle")),
+                                description = reader.GetString(reader.GetOrdinal("productDescription")),
+                                quantity = reader.GetInt32(reader.GetOrdinal("productQuantity"))
+                            };
+                            products.Add(product);
+                        };
+
+                        reader.Close();
+                        return products;
                     }
                 }
             }
