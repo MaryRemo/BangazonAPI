@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
-namespace BangazonSprint.Controllers
+namespace BangazonSprintStartUp.Controllers
 
 {
     [Route("api/[controller]")]
@@ -14,33 +14,33 @@ namespace BangazonSprint.Controllers
     {
         // GET: api/Customer
         [HttpGet]
-        public IEnumerable<string> Get()
+        public IEnumerable<string> GetAllCustomers()
         {
             return new string[] { "value1", "value2" };
         }
 
         // GET: api/Customer/5
-        [HttpGet("{id}", Name = "Get")]
-        public string Get(int id)
+        [HttpGet("{id}", Name = "Customer")]
+        public string GetCustomer(int id)
         {
             return "value";
         }
 
         // POST: api/Customer
         [HttpPost]
-        public void Post([FromBody] string value)
+        public void PostCustomer([FromBody] string value)
         {
         }
 
         // PUT: api/Customer/5
         [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        public void PutCustomer(int id, [FromBody] string value)
         {
         }
 
         // DELETE: api/ApiWithActions/5
         [HttpDelete("{id}")]
-        public void Delete(int id)
+        public void DeleteCustomer(int id)
         {
         }
     }

@@ -1,7 +1,7 @@
 using System;
 using Xunit;
 
-namespace TestBangazonAPI
+namespace BangazonSprintStartUp
 {
     public class UnitTest1
     {
