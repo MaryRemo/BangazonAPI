@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
-namespace BangazonSprintStartUp.Controllers
+namespace BangazonSprint.Controllers
 
 {
     [Route("api/[controller]")]

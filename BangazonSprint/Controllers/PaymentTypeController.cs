@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 
-namespace BangazonSprintStartUp.Controllers
+namespace BangazonSprint.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
