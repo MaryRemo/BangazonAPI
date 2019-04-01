@@ -1,6 +1,6 @@
 ﻿/*
- * CREATED BY: HM
- */
+* CREATED BY: HM
+*/
 
 using System;
 using System.Collections.Generic;
@@ -45,19 +45,49 @@ namespace BangazonSprint.Controllers
                     if (include == "products")
                     {
                         cmd.CommandText = @"
-                                        select * from productType
-                                        left join product 
-                                        on productType.id = product.productTypeId
-                                        left join orderProduct 
-                                        on product.id = orderProduct.productid
-                                        left join [order]
-                                        on orderProduct.orderId = [order].id 
-                                        left join PaymentType
-                                        on [order].paymentTypeId = paymentType.id
-                                        left join customer
-                                        on paymentType.CustomerId = customer.id
-                                         WHERE 1 = 1";
+                                    select p.id, p.[name], 
+                                    product.id as ProductId, product.ProductTypeId, product.CustomerId, Product.price as ProductPrice, Product.Title as ProductTitle, Product.[Description] as ProductD, Product.Quantity as ProductQ,
+                                    OrderProduct.Id, OrderProduct.OrderId, OrderProduct.ProductId,
+                                    [Order].Id, [Order].CustomerId, [Order].PaymentTypeId,
+                                    PaymentType.Id, PaymentType.[Name], PaymentType.AcctNumber, PaymentType.CustomerId,
+                                    Customer.Id as CustomerID, Customer.FirstName as CustomerFirstName, Customer.LastName as CustomerLastName
+                                    from productType as p
+                                    left join product 
+                                    on p.id = product.productTypeId
+                                    left join orderProduct 
+                                    on product.id = orderProduct.productid
+                                    left join [order]
+                                    on orderProduct.orderId = [order].id 
+                                    left join PaymentType
+                                    on [order].paymentTypeId = paymentType.id
+                                    left join customer
+                                    on paymentType.CustomerId = customer.id
+                                    WHERE 1 = 1";
                     }
+
+                    else if (include == "customers")
+                    {
+                        cmd.CommandText = @"
+                                    select p.id, p.[name], 
+                                    product.id as ProductId, product.ProductTypeId, product.CustomerId, Product.price as ProductPrice, Product.Title as ProductTitle, Product.[Description] as ProductD, Product.Quantity as ProductQ,
+                                    OrderProduct.Id, OrderProduct.OrderId, OrderProduct.ProductId,
+                                    [Order].Id, [Order].CustomerId, [Order].PaymentTypeId,
+                                    PaymentType.Id, PaymentType.[Name], PaymentType.AcctNumber, PaymentType.CustomerId,
+                                    Customer.Id as CustomerID, Customer.FirstName as CustomerFirstName, Customer.LastName as CustomerLastName
+                                    from productType as p
+                                    left join product 
+                                    on p.id = product.productTypeId
+                                    left join orderProduct 
+                                    on product.id = orderProduct.productid
+                                    left join [order]
+                                    on orderProduct.orderId = [order].id 
+                                    left join PaymentType
+                                    on [order].paymentTypeId = paymentType.id
+                                    left join customer
+                                    on paymentType.CustomerId = customer.id
+                                    WHERE 1 = 1";
+                    }
+
                     else
                     {
                         cmd.CommandText = @"
@@ -75,10 +105,11 @@ namespace BangazonSprint.Controllers
 
                     SqlDataReader reader = cmd.ExecuteReader();
 
+
                     Dictionary<int, Order> orders = new Dictionary<int, Order>();
                     while (reader.Read())
                     {
-                        int orderId = reader.GetInt32(reader.GetOrdinal("order.id"));
+                        int orderId = reader.GetInt32(reader.GetOrdinal("id"));
                         if (!orders.ContainsKey(orderId))
                         {
                             Order newOrder = new Order
@@ -86,25 +117,57 @@ namespace BangazonSprint.Controllers
                                 id = orderId,
                                 CustomerId = reader.GetInt32(reader.GetOrdinal("CustomerId")),
                                 PaymentTypeId = reader.GetInt32(reader.GetOrdinal("PaymentTypeId")),
+
                             };
 
                             orders.Add(orderId, newOrder);
                         }
 
-                        
+                        if (include == "products")
+                        {
+                            if (!reader.IsDBNull(reader.GetOrdinal("productId")))
+                            {
+                                Order currentOrder = orders[orderId];
+                                currentOrder.Products.Add(
+                                    new Product
+                                    {
+                                        Id = reader.GetInt32(reader.GetOrdinal("ProductId")),
+                                        Title = reader.GetString(reader.GetOrdinal("ProductTitle")),
+                                        Price = reader.GetInt32(reader.GetOrdinal("ProductPrice")),
+                                        Description = reader.GetString(reader.GetOrdinal("ProductD")),
+                                        Quantitiy = reader.GetInt32(reader.GetOrdinal("ProductQ"))
+                                    }
+                                );
+                            }
+                        }
+                        if (include == "customers")
+                        {
+                            if (!reader.IsDBNull(reader.GetOrdinal("CustomerId")))
+                            {
+                                Order currentOrder = orders[orderId];
+                                currentOrder.Customers.Add(
+                                    new Customer
+                                    {
+                                        Id = reader.GetInt32(reader.GetOrdinal("CustomerId")),
+                                        FirstName = reader.GetString(reader.GetOrdinal("CustomerFirstName")),
+                                        LastName = reader.GetString(reader.GetOrdinal("CustomerLastName")),
+                                    }
+                                );
+                            }
+                        }
                     }
+                reader.Close();
 
-                    reader.Close();
-
-                    return orders.Values.ToList();
-                }
+                return orders.Values.ToList();
             }
         }
+    }
+}
 
         /*
 
         // GET: api/Students/5?include=exercise
-        [HttpGet("{id}", Name = "GetSpecificOrder")]
+        [HttpGet("{id}", Name = "GetSingleOrder")]
         public Students Get(int id, string include)
         {
             using (SqlConnection conn = Connection)
@@ -345,4 +408,4 @@ namespace BangazonSprint.Controllers
         }
     }
      */
-}
+
