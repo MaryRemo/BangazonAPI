@@ -166,9 +166,15 @@ namespace BangazonSprint.Controllers
 
         /*
 
+<<<<<<< HEAD
         // GET: api/Students/5?include=exercise
         [HttpGet("{id}", Name = "GetSingleOrder")]
         public Students Get(int id, string include)
+=======
+        // GET: api/Order/5
+        [HttpGet("{id}", Name = "GetSingleOrder")]
+        public string Get(int id)
+>>>>>>> master
         {
             using (SqlConnection conn = Connection)
             {
