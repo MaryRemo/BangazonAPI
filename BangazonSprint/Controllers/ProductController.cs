@@ -19,7 +19,7 @@ namespace BangazonSprint.Controllers
         }
 
         // GET: api/Product/5
-        [HttpGet("{id}", Name = "Get")]
+        [HttpGet("{id}", Name = "GetSingleProduct")]
         public string Get(int id)
         {
             return "value";
