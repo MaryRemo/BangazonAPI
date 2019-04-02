@@ -77,7 +77,7 @@ You should get nothing back from this besides an OK status. When you run the GET
  ##### DELETE
  To DELETE an existing product type, select DELETE then paste ```localhost:5000/PaymentType/2``` or any other existing PaymentType then click send. You should get nothing back from this besides an OK status. When you run the GET query the order with the Id you specified in your DELETE query should no longer exist.
 
-### 3. Customer
+### 4. Customer
 Use the command ```dotnet run``` to start the program, BangazonAPI. Once the program is running, open up the Postman desktop app and run the following commands for each request method:
  ##### GET
  To GET all customers, select GET in Postman then paste ```localhost:5000/customer``` into the field and click send. The result should be an array of all the payment type in the database that should look like:
