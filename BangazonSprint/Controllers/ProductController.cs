@@ -171,7 +171,7 @@ namespace BangazonSprint.Controllers
 
         // PUT: api/Product/5
         [HttpPut("{id}")]
-        public IActionResult PutProduct([FromRoute] int id, [FromBody] Product product)
+        public IActionResult PutProduct([FromRoute] int id, [FromBody] Product editedProduct)
         {
             using (SqlConnection conn = Connection)
             {
@@ -188,24 +188,29 @@ namespace BangazonSprint.Controllers
                                                Quantity = @quantity
                                          WHERE id = @id;";
 
-                    cmd.Parameters.Add(new SqlParameter("@productTypeId", product.ProductTypeId));
+                    cmd.Parameters.Add(new SqlParameter("@productTypeId", editedProduct.ProductTypeId));
                     cmd.Parameters.Add(new SqlParameter("@customerId", product.CustomerId));
                     cmd.Parameters.Add(new SqlParameter("@price", product.Price));
                     cmd.Parameters.Add(new SqlParameter("@title", product.Title));
                     cmd.Parameters.Add(new SqlParameter("@description", product.Description));
                     cmd.Parameters.Add(new SqlParameter("@quantity", product.Quantity));
 
-                    int rowsAffected = cmd.ExecuteNonQuery();
-                    //NOTE: HMN: ExecuteNonQuery() executes a Transact-SQL statment against the connection and returns the number of rows affected.
+                    //int rowsAffected = cmd.ExecuteNonQuery();
+                    ////NOTE: HMN: ExecuteNonQuery() executes a Transact-SQL statment against the connection and returns the number of rows affected.
 
-                    // HMN: If the rows affected are greater than 0, return an empty StatusCodes204 object indicating success; otherwise, if no rows are affected, return an error message (exception).
-                    if(rowsAffected > 0)
-                    {
-                        return NoContent();
-                        //NOTE: HMN: NoContent() comes from the ControllerBase; it creates an empty NoContent object that produces an empty StatusCodes.StatusCodes204NoContent response. An HTTP 204 No Content success status response code indicates that the request has succeeded, but that the client doesn't need to go away from its current page.
-                        //HMN: MDN Resource: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/204
-                    }
-                    throw new Exception("No rows affected");
+                    //// HMN: If the rows affected are greater than 0, return an empty StatusCodes204 object indicating success; otherwise, if no rows are affected, return an error message (exception).
+                    //if(rowsAffected > 0)
+                    //{
+                    //    return NoContent();
+                    //    //NOTE: HMN: NoContent() comes from the ControllerBase; it creates an empty NoContent object that produces an empty StatusCodes.StatusCodes204NoContent response. An HTTP 204 No Content success status response code indicates that the request has succeeded, but that the client doesn't need to go away from its current page.
+                    //    //HMN: MDN Resource: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/204
+                    //}
+                    //throw new Exception("No rows affected");
+
+                    int editedId = (int)cmd.ExecuteScalar();
+                    editedProduct.Id = editedId;
+                    return CreatedAtRoute("PutProduct", new { id = editedId }, editedProduct);
+
                 }
             }
         }
