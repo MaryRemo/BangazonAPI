@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.AspNetCore.Mvc;
 using BangazonSprint.Models;
+using BangazonSprintStartUp.Models;
 
 namespace BangazonSprint.Controllers
 {
@@ -31,90 +32,72 @@ namespace BangazonSprint.Controllers
         }
 
         // GET: api/Product
-        //NOTE: HMN: The ProductType model has not been set up yet but it should be included in the query for GetAllProducts. When ProductType has been established, add to this query.
-        //NOTE:  HMN: MR is working on Customer model; the customer_id should be included in this query. 
 
         [HttpGet]
-        public List<Product> GetAllProducts(string q)
+        public IActionResult GetAllProducts()
         {
             using (SqlConnection conn = Connection)
             {
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
-                    if (q != null)
-                    {
-                        cmd.CommandText = $@"SELECT 
-                                                p.id AS ProductId, 
-                                                p.price AS ProductPrice, 
-                                                p.title AS ProductTitle, 
-                                                p.description AS ProductDescription, 
-                                                p.quantity AS ProductQuantity
-                                            FROM Product p";
+                    //if (q != null)
+                    
+                        //? QUESTION:
+                        //NOTE: Included in this query are the Product Name and Customer Firstname and Lastname. The query was set up this way as a double-check step for verifying the correct ids for the various columns. However, including ProductName, CustomerFirstName and CustomerLastName have not been requested by the Product Manager. Before merging, clear this up with the PM.
 
-                        //NOTE:HMN:  ProductType and CustomerId need to be added to the query!!!
+                        cmd.CommandText = @"SELECT 
+                                                p.Id AS ProductId,
+                                                p.ProductTypeId,
+                                                pt.[Name] AS ProductTypeName,
+                                                p.CustomerId, 
+                                                p.FirstName AS CustomerFirstName,
+                                                p.LastName AS CustomerLastName,
+                                                p.Price AS ProductPrice, 
+                                                p.Title AS ProductTitle, 
+                                                p.Description AS ProductDescription, 
+                                                p.Quantity AS ProductQuantity
+                                            FROM Product p
+                                            INNER JOIN p.ProductTypeId = pt.Id
+                                            LEFT JOIN Customer c ON p.CustomerId = c.Id";
+                    //cmd.Parameters.Add(new SqlParameter("@q", $"%{q}%"));
+                    SqlDataReader reader = cmd.ExecuteReader();
 
-                        cmd.Parameters.Add(new SqlParameter("@q", $"%{q}%"));
-                        SqlDataReader reader = cmd.ExecuteReader();
-
-                        List<Product> products = new List<Product>();
+                    List<Product> products = new List<Product>();
                         while (reader.Read())
                         {
                             Product product = new Product
                             {
-                                id = reader.GetInt32(reader.GetOrdinal("id")),
-                                price = reader.GetInt32(reader.GetOrdinal("productPrice")),
-                                title = reader.GetString(reader.GetOrdinal("productTitle")),
-                                description = reader.GetString(reader.GetOrdinal("productDescription")),
-                                quantity = reader.GetInt32(reader.GetOrdinal("productQuantity"))
+                                Id = reader.GetInt32(reader.GetOrdinal("productId")),
+                                Price = reader.GetInt32(reader.GetOrdinal("productPrice")),
+                                Title = reader.GetString(reader.GetOrdinal("productTitle")),
+                                Description = reader.GetString(reader.GetOrdinal("productDescription")),
+                                Quantity = reader.GetInt32(reader.GetOrdinal("productQuantity")),
+                                ProductTypeId = reader.GetInt32(reader.GetOrdinal("ProductTypeId")),
+                                ProductType = new ProductType
+                                {
+                                    Id = reader.GetInt32(reader.GetOrdinal("ProductTypeId")),
+                                    Name = reader.GetString(reader.GetOrdinal("ProductTypeName"))
+                                },
+                                CustomerId = reader.GetInt32(reader.GetOrdinal("CustomerId")),
+                                Customer = new Customer
+                                {
+                                    Id = reader.GetInt32(reader.GetOrdinal("CustomerId")),
+                                    FirstName = reader.GetString(reader.GetOrdinal("CustomerFirstName")),
+                                    LastName = reader.GetString(reader.GetOrdinal("CustomerLastName"))
+                                }
                             };
-
                             products.Add(product);
                         }
-
                         reader.Close();
-                        return products;
-                    }
-                    else
-                    {
-                        cmd.CommandText = $@"SELECT 
-                                                p.id AS ProductId, 
-                                                p.price AS ProductPrice, 
-                                                p.title AS ProductTitle, 
-                                                p.description AS ProductDescription, 
-                                                p.quantity AS ProductQuantity
-                                            FROM Product p";
-                        SqlDataReader reader = cmd.ExecuteReader();
-
-                        List<Product> products = new List<Product>();
-
-                        while (reader.Read())
-                        {
-                            Product product = new Product
-                            {
-                                id = reader.GetInt32(reader.GetOrdinal("productId")),
-                                price = reader.GetInt32(reader.GetOrdinal("productPrice")),
-                                title = reader.GetString(reader.GetOrdinal("productTitle")),
-                                description = reader.GetString(reader.GetOrdinal("productDescription")),
-                                quantity = reader.GetInt32(reader.GetOrdinal("productQuantity"))
-                            };
-                            //NOTE: JOIN ProductType and Customer here
-
-                            //NOTE : Create ProductType and Customer objects here
-
-                            products.Add(product);
-                        };
-
-                        reader.Close();
-                        return products;
+                        return Ok(products);
                     }
                 }
             }
-        }
 
         // GET: api/Product/5
         [HttpGet("{id}", Name = "GetSingleProduct")]
-        public Product Get(int id)
+        public IActionResult GetSingleProduct([FromRoute] int id)
         {
             using (SqlConnection conn = Connection)
             {
@@ -122,13 +105,20 @@ namespace BangazonSprint.Controllers
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
                     cmd.CommandText = @"SELECT 
-                                                p.id AS ProductId, 
-                                                p.price AS ProductPrice, 
-                                                p.title AS ProductTitle, 
-                                                p.description AS ProductDescription, 
-                                                p.quantity AS ProductQuantity
+                                                p.Id AS ProductId,
+                                                p.ProductTypeId,
+                                                pt.[Name] AS ProductTypeName,
+                                                p.CustomerId, 
+                                                p.FirstName AS CustomerFirstName,
+                                                p.LastName AS CustomerLastName,
+                                                p.Price AS ProductPrice, 
+                                                p.Title AS ProductTitle, 
+                                                p.Description AS ProductDescription, 
+                                                p.Quantity AS ProductQuantity
                                             FROM Product p
-                                            WHERE p.id = @id";
+                                            INNER JOIN p.ProductTypeId = pt.Id
+                                            LEFT JOIN Customer c ON p.CustomerId = c.Id
+                                            WHERE p.Id = @id";
                     cmd.Parameters.Add(new SqlParameter("@id", id));
                     SqlDataReader reader = cmd.ExecuteReader();
 
@@ -137,50 +127,65 @@ namespace BangazonSprint.Controllers
                     {
                         product = new Product
                         {
-                            id = reader.GetInt32(reader.GetOrdinal("id")),
-                            price = reader.GetInt32(reader.GetOrdinal("productPrice")),
-                            title = reader.GetString(reader.GetOrdinal("productTitle")),
-                            description = reader.GetString(reader.GetOrdinal("productDescription")),
-                            quantity = reader.GetInt32(reader.GetOrdinal("productQuantity"))
+                            Id = reader.GetInt32(reader.GetOrdinal("productId")),
+                            Price = reader.GetInt32(reader.GetOrdinal("productPrice")),
+                            Title = reader.GetString(reader.GetOrdinal("productTitle")),
+                            Description = reader.GetString(reader.GetOrdinal("productDescription")),
+                            Quantity = reader.GetInt32(reader.GetOrdinal("productQuantity")),
+                            ProductTypeId = reader.GetInt32(reader.GetOrdinal("ProductTypeId")),
+                            ProductType = new ProductType
+                            {
+                                Id = reader.GetInt32(reader.GetOrdinal("ProductTypeId")),
+                                Name = reader.GetString(reader.GetOrdinal("ProductTypeName"))
+                            },
+                            CustomerId = reader.GetInt32(reader.GetOrdinal("CustomerId")),
+                            Customer = new Customer
+                            {
+                                Id = reader.GetInt32(reader.GetOrdinal("CustomerId")),
+                                FirstName = reader.GetString(reader.GetOrdinal("CustomerFirstName")),
+                                LastName = reader.GetString(reader.GetOrdinal("CustomerLastName"))
+
+                            }
                         };
-                        //NOTE: JOIN ProductType and Customer here
-                        //NOTE: Create ProductType and Customer objects here
                     }
 
                     reader.Close();
-                    return product;
+                    return Ok(product);
                 }
             }
         }
 
         // POST: api/Product
         [HttpPost]
-        public ActionResult Post([FromBody] Product newProduct)
+        public IActionResult PostProduct([FromBody] Product newProduct)
         {
             using (SqlConnection conn = Connection)
             {
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
-                    cmd.CommandText = @"INSERT INTO Product 
-                                            p.id AS ProductId, 
-                                            p.price AS ProductPrice, 
-                                            p.title AS ProductTitle, 
-                                            p.description AS ProductDescription, 
-                                            p.quantity AS ProductQuantity
+                    cmd.CommandText = @"INSERT INTO Product
+                                            (ProductTypeId,
+                                            CustomerId,
+                                            Price, 
+                                            Title, 
+                                            Description, 
+                                            Quantity)
                                         OUTPUT INSERTED.Id
-                                        VALUES (@productPrice, @productTitle, @productDescription, @productQuantity)";
+                                        VALUES (@productTypeId, @customerId, @price, @title, @description, @quantity)";
 
-                    //NOTE: Need to add ProductType and CustomerId to query
-
-                    cmd.Parameters.Add(new SqlParameter("@ProductPrice", newProduct.price));
-                    cmd.Parameters.Add(new SqlParameter("@productTitle", newProduct.title));
-                    cmd.Parameters.Add(new SqlParameter("@productDescription", newProduct.description));
-                    cmd.Parameters.Add(new SqlParameter("@productQuantity", newProduct.quantity));
+                    cmd.Parameters.Add(new SqlParameter("@productTypeId", newProduct.ProductTypeId));
+                    cmd.Parameters.Add(new SqlParameter("@customerId", newProduct.CustomerId));
+                    cmd.Parameters.Add(new SqlParameter("@price", newProduct.Price));
+                    cmd.Parameters.Add(new SqlParameter("@title", newProduct.Title));
+                    cmd.Parameters.Add(new SqlParameter("@description", newProduct.Description));
+                    cmd.Parameters.Add(new SqlParameter("@quantity", newProduct.Quantity));
 
                     int newId = (int)cmd.ExecuteScalar();
-                    newProduct.id = newId;
+                    newProduct.Id = newId;
                     return CreatedAtRoute("GetSingleProduct", new { id = newId }, newProduct);
+
+                    //? HMN: Doesn't the return need an "await"? See PostProduct on line 165.
                 }
             }
         }
@@ -188,7 +193,7 @@ namespace BangazonSprint.Controllers
 
         // PUT: api/Product/5
         [HttpPut("{id}")]
-        public void Put(int id, [FromBody] Product product)
+        public IActionResult PutProduct([FromRoute] int id, [FromBody] Product product)
         {
             using (SqlConnection conn = Connection)
             {
@@ -196,36 +201,55 @@ namespace BangazonSprint.Controllers
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
                     cmd.CommandText = @"UPDATE Product
-                                           SET price = @price, 
-                                               title = @title,
-                                               description = @description,
-                                               quantity = @quantity
+                                           SET 
+                                               ProductTypeId = @productTypeId,
+                                               CustomerId = @customerId,
+                                               Price = @price, 
+                                               Title = @title,
+                                               Description = @description,
+                                               Quantity = @quantity
                                          WHERE id = @id;";
 
-                    cmd.Parameters.Add(new SqlParameter("@price", product.price));
-                    cmd.Parameters.Add(new SqlParameter("@title", product.title));
-                    cmd.Parameters.Add(new SqlParameter("@description", product.description));
-                    cmd.Parameters.Add(new SqlParameter("@quantity", product.quantity));
+                    cmd.Parameters.Add(new SqlParameter("@productTypeId", product.ProductTypeId));
+                    cmd.Parameters.Add(new SqlParameter("@customerId", product.CustomerId));
+                    cmd.Parameters.Add(new SqlParameter("@price", product.Price));
+                    cmd.Parameters.Add(new SqlParameter("@title", product.Title));
+                    cmd.Parameters.Add(new SqlParameter("@description", product.Description));
+                    cmd.Parameters.Add(new SqlParameter("@quantity", product.Quantity));
 
-                    cmd.ExecuteNonQuery();
+                    int rowsAffected = cmd.ExecuteNonQuery();
+                    //NOTE: HMN: ExecuteNonQuery() executes a Transact-SQL statment against the connection and returns the number of rows affected.
+
+                    // HMN: If the rows affected are greater than 0, return an empty StatusCodes204 object indicating success; otherwise, if no rows are affected, return an error message (exception).
+                    if(rowsAffected > 0)
+                    {
+                        return NoContent();
+                        //NOTE: HMN: NoContent() comes from the ControllerBase; it creates an empty NoContent object that produces an empty StatusCodes.StatusCodes204NoContent response. An HTTP 204 No Content success status response code indicates that the request has succeeded, but that the client doesn't need to go away from its current page.
+                        //HMN: MDN Resource: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/204
+                    }
+                    throw new Exception("No rows affected");
                 }
             }
         }
 
         // DELETE: api/ApiWithActions/5
         [HttpDelete("{id}")]
-        public void Delete(int id)
+        public IActionResult DeleteProduct([FromRoute] int id)
         {
             using (SqlConnection conn = Connection)
             {
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
-                    cmd.CommandText = "DELETE FROM product " +
-                                      "WHERE id = @id;";
+                    cmd.CommandText = "DELETE FROM Product WHERE Id = @id";
                     cmd.Parameters.Add(new SqlParameter("@id", id));
 
-                    cmd.ExecuteNonQuery();
+                    int rowsAffected = cmd.ExecuteNonQuery();
+                    if(rowsAffected > 0)
+                    {
+                        return NoContent();
+                    }
+                    throw new Exception("No rows affected");
                 }
             }
         }
