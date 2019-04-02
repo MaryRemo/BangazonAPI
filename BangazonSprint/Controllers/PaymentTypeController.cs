@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Threading.Tasks;
+using BangazonSprint.Models;
 using BangazonSprintStartUp.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -72,11 +73,7 @@ namespace BangazonSprint.Controllers
 
         // GET: api/PaymentType/5
         [HttpGet("{id}", Name = "GetSinglePaymentType")]
-<<<<<<< HEAD
-        public string Get(int id)
-=======
         public PaymentType Get(int id)
->>>>>>> master
         {
             using (SqlConnection conn = Connection)
             {

@@ -1,4 +1,5 @@
-﻿using BangazonSprint.Models;
+﻿//CREATED BY MR
+using BangazonSprint.Models;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -26,7 +27,7 @@ namespace TestBangazonAPI
                 var customerAsJSON = JsonConvert.SerializeObject(customer);
 
                 var response = await client.PostAsync(
-                    "/api/paymenttype",
+                    "/api/customer",
                     new StringContent(customerAsJSON, Encoding.UTF8, "application/json")
                 );
 
@@ -79,14 +80,14 @@ namespace TestBangazonAPI
 
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-                var getRemo = await client.GetAsync("/api/customer/2");
-                getBlackCard.EnsureSuccessStatusCode();
+                var getRemo = await client.GetAsync("/api/customer/1");
+                getRemo.EnsureSuccessStatusCode();
 
                 string getRemoBody = await getRemo.Content.ReadAsStringAsync();
                 Customer newLastName = JsonConvert.DeserializeObject<Customer>(getRemoBody);
 
                 Assert.Equal(HttpStatusCode.OK, getRemo.StatusCode);
-                Assert.Equal(newName, newRemo.LastName);
+                Assert.Equal(newName, newLastName.LastName);
             }
         }
     }
