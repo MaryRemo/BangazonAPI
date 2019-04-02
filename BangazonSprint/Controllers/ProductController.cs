@@ -171,7 +171,7 @@ namespace BangazonSprint.Controllers
 
         // PUT: api/Product/5
         [HttpPut("{id}")]
-        public IActionResult PutProduct([FromRoute] int id, [FromBody] Product editedProduct)
+        public void PutProduct(int id, [FromBody] Product editedProduct)
         {
             using (SqlConnection conn = Connection)
             {
@@ -186,14 +186,15 @@ namespace BangazonSprint.Controllers
                                                Title = @title,
                                                Description = @description,
                                                Quantity = @quantity
-                                         WHERE id = @id;";
+                                         WHERE Id = @id;";
 
+                    cmd.Parameters.Add(new SqlParameter("@id", id));
                     cmd.Parameters.Add(new SqlParameter("@productTypeId", editedProduct.ProductTypeId));
-                    cmd.Parameters.Add(new SqlParameter("@customerId", product.CustomerId));
-                    cmd.Parameters.Add(new SqlParameter("@price", product.Price));
-                    cmd.Parameters.Add(new SqlParameter("@title", product.Title));
-                    cmd.Parameters.Add(new SqlParameter("@description", product.Description));
-                    cmd.Parameters.Add(new SqlParameter("@quantity", product.Quantity));
+                    cmd.Parameters.Add(new SqlParameter("@customerId", editedProduct.CustomerId));
+                    cmd.Parameters.Add(new SqlParameter("@price", editedProduct.Price));
+                    cmd.Parameters.Add(new SqlParameter("@title", editedProduct.Title));
+                    cmd.Parameters.Add(new SqlParameter("@description", editedProduct.Description));
+                    cmd.Parameters.Add(new SqlParameter("@quantity", editedProduct.Quantity));
 
                     //int rowsAffected = cmd.ExecuteNonQuery();
                     ////NOTE: HMN: ExecuteNonQuery() executes a Transact-SQL statment against the connection and returns the number of rows affected.
@@ -207,9 +208,11 @@ namespace BangazonSprint.Controllers
                     //}
                     //throw new Exception("No rows affected");
 
-                    int editedId = (int)cmd.ExecuteScalar();
-                    editedProduct.Id = editedId;
-                    return CreatedAtRoute("PutProduct", new { id = editedId }, editedProduct);
+                    cmd.ExecuteNonQuery();
+
+                    //int editedId = (int)cmd.ExecuteScalar();
+                    //editedProduct.Id = editedId;
+                    //return CreatedAtRoute("PutProduct", new { id = editedId }, editedProduct);
 
                 }
             }
