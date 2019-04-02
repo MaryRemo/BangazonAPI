@@ -2,13 +2,11 @@
 using System.Data;
 using System.Collections.Generic;
 using System.Data.SqlClient;
-using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.AspNetCore.Mvc;
 using BangazonSprint.Models;
-using BangazonSprintStartUp.Models;
 
 namespace BangazonSprint.Controllers
 {
@@ -42,37 +40,37 @@ namespace BangazonSprint.Controllers
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
                     //if (q != null)
-                    
-                        //? QUESTION:
-                        //NOTE: Included in this query are the Product Name and Customer Firstname and Lastname. The query was set up this way as a double-check step for verifying the correct ids for the various columns. However, including ProductName, CustomerFirstName and CustomerLastName have not been requested by the Product Manager. Before merging, clear this up with the PM.
 
-                        cmd.CommandText = @"SELECT 
-                                                p.Id AS ProductId,
-                                                p.ProductTypeId,
-                                                pt.[Name] AS ProductTypeName,
-                                                p.CustomerId, 
-                                                p.FirstName AS CustomerFirstName,
-                                                p.LastName AS CustomerLastName,
-                                                p.Price AS ProductPrice, 
-                                                p.Title AS ProductTitle, 
-                                                p.Description AS ProductDescription, 
-                                                p.Quantity AS ProductQuantity
-                                            FROM Product p
-                                            INNER JOIN p.ProductTypeId = pt.Id
-                                            LEFT JOIN Customer c ON p.CustomerId = c.Id";
+                    //? QUESTION:
+                    //NOTE: Included in this query are the Product Name and Customer Firstname and Lastname. The query was set up this way as a double-check step for verifying the correct ids for the various columns. However, including ProductName, CustomerFirstName and CustomerLastName have not been requested by the Product Manager. Before merging, clear this up with the PM.
+
+
+                    //cmd.CommandText = @"SELECT p.Id,
+                    //                        p.ProductTypeId,
+                    //                        p.CustomerId, 
+                    //                        p.Price, 
+                    //                        p.Title, 
+                    //                        p.Description, 
+                    //                        p.Quantity
+                    //                    FROM Product p INNER JOIN ProductType pt ON p.ProductTypeId = pt.Id LEFT JOIN Customer c ON p.CustomerId = c.Id";
+
+                    cmd.CommandText = @"SELECT p.Id, p.ProductTypeId, pt.Name AS ProductTypeName, p.CustomerId, c.FirstName AS CustomerFirstName, c.LastName AS CustomerLastName, p.Price, p.Title, p.Description, p.Quantity
+                                        FROM Product p
+                                        INNER JOIN ProductType pt ON p.ProductTypeId = pt.Id
+                                        LEFT JOIN Customer c ON p.CustomerId = c.Id";
                     //cmd.Parameters.Add(new SqlParameter("@q", $"%{q}%"));
                     SqlDataReader reader = cmd.ExecuteReader();
 
-                    List<Product> products = new List<Product>();
+        List<Product> products = new List<Product>();
                         while (reader.Read())
                         {
                             Product product = new Product
                             {
-                                Id = reader.GetInt32(reader.GetOrdinal("productId")),
-                                Price = reader.GetInt32(reader.GetOrdinal("productPrice")),
-                                Title = reader.GetString(reader.GetOrdinal("productTitle")),
-                                Description = reader.GetString(reader.GetOrdinal("productDescription")),
-                                Quantity = reader.GetInt32(reader.GetOrdinal("productQuantity")),
+                                Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                                Price = reader.GetInt32(reader.GetOrdinal("Price")),
+                                Title = reader.GetString(reader.GetOrdinal("Title")),
+                                Description = reader.GetString(reader.GetOrdinal("Description")),
+                                Quantity = reader.GetInt32(reader.GetOrdinal("Quantity")),
                                 ProductTypeId = reader.GetInt32(reader.GetOrdinal("ProductTypeId")),
                                 ProductType = new ProductType
                                 {
@@ -87,11 +85,11 @@ namespace BangazonSprint.Controllers
                                     LastName = reader.GetString(reader.GetOrdinal("CustomerLastName"))
                                 }
                             };
-                            products.Add(product);
+        products.Add(product);
                         }
-                        reader.Close();
+    reader.Close();
                         return Ok(products);
-                    }
+}
                 }
             }
 
