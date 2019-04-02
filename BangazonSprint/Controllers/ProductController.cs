@@ -168,7 +168,6 @@ namespace BangazonSprint.Controllers
             }
         }
 
-
         // PUT: api/Product/5
         [HttpPut("{id}")]
         public void PutProduct(int id, [FromBody] Product editedProduct)
@@ -209,11 +208,6 @@ namespace BangazonSprint.Controllers
                     //throw new Exception("No rows affected");
 
                     cmd.ExecuteNonQuery();
-
-                    //int editedId = (int)cmd.ExecuteScalar();
-                    //editedProduct.Id = editedId;
-                    //return CreatedAtRoute("PutProduct", new { id = editedId }, editedProduct);
-
                 }
             }
         }
