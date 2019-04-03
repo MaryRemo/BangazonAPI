@@ -1,6 +1,6 @@
 ﻿// CREATED BY: AB
 
-using BangazonSprintStartUp.Models;
+using BangazonSprint.Models;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
