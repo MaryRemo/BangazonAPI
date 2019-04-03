@@ -48,7 +48,7 @@ namespace TestBangazonAPI
             using (var client = new APIClientProvider().Client)
             {
 
-                var response = await client.GetAsync("/api/paymenttype");
+                var response = await client.GetAsync("/api/customer");
 
                 string responseBody = await response.Content.ReadAsStringAsync();
                 var customerList = JsonConvert.DeserializeObject<List<Customer>>(responseBody);
