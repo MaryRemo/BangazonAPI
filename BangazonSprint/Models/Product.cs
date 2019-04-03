@@ -3,7 +3,6 @@ using System.Data.SqlClient;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using BangazonSprintStartUp.Models;
 
 namespace BangazonSprint.Models
 {

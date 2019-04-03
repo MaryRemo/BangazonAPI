@@ -1,6 +1,6 @@
 ﻿// CREATED BY: AB
 
-using BangazonSprintStartUp.Models;
+using BangazonSprint.Models;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 using TestBangazonAPI;
 using Xunit;
 
-namespace BangazonSprintStartUp
+namespace BangazonSprint
 {
     public class PaymentTypeTest
     {
