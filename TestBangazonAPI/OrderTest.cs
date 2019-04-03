@@ -46,7 +46,9 @@ namespace BangazonSprint
         }
 
 
-        
+        /*
+      Getting all orders:
+      */
         [Fact]
         public async Task Test_Get_All_Orders()
         {
@@ -65,41 +67,90 @@ namespace BangazonSprint
         }
 
         /*
-
+       Getting one order:
+       */
         [Fact]
-        public async Task Test_Modify_PaymentType()
+        public async Task Test_Get_One_Order()
         {
-            string newName = "Black Card";
 
             using (var client = new APIClientProvider().Client)
             {
-                PaymentType modifiedPaymentType = new PaymentType
-                {
-                    Name = newName,
-                    AcctNumber = 555555555,
-                    CustomerId = 1
-                };
-                var modifiedPaymentTypeAsJSON = JsonConvert.SerializeObject(modifiedPaymentType);
 
-                var response = await client.PutAsync(
-                    "/api/paymenttype/2",
-                    new StringContent(modifiedPaymentTypeAsJSON, Encoding.UTF8, "application/json")
-                );
+                var response = await client.GetAsync("/api/order/6");
+
+
                 string responseBody = await response.Content.ReadAsStringAsync();
+                var order = JsonConvert.DeserializeObject<Order>(responseBody);
+
 
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-
-                var getBlackCard = await client.GetAsync("/api/paymenttype/2");
-                getBlackCard.EnsureSuccessStatusCode();
-
-                string getBlackCardBody = await getBlackCard.Content.ReadAsStringAsync();
-                PaymentType newBlackCard = JsonConvert.DeserializeObject<PaymentType>(getBlackCardBody);
-
-                Assert.Equal(HttpStatusCode.OK, getBlackCard.StatusCode);
-                Assert.Equal(newName, newBlackCard.Name);
+                Assert.Equal(3, order.PaymentTypeId);
             }
         }
 
-    */
+        /*
+         Deleting a student
+        */
+        [Fact]
+        public async Task Test_Delete_One_Order()
+        {
+
+            using (var client = new APIClientProvider().Client)
+            {
+
+                var deleteResponse = await client.DeleteAsync("/api/order/15");
+
+
+                string responseBody = await deleteResponse.Content.ReadAsStringAsync();
+                var order = JsonConvert.DeserializeObject<Order>(responseBody);
+
+
+                Assert.Equal(HttpStatusCode.NoContent, deleteResponse.StatusCode);
+
+            }
+        }
+
+        /*
+         Updating a student
+        */
+        [Fact]
+        public async Task Test_Modify_Order()
+        {
+            // New last name to change to and test
+            int newPaymentId = 3;
+
+            using (var client = new APIClientProvider().Client)
+            {
+                /*
+                    PUT section
+                */
+                Order modifiedOrder = new Order
+                {
+                    CustomerId = 2,
+                    PaymentTypeId = newPaymentId
+                };
+                var modifiedOrderAsJSON = JsonConvert.SerializeObject(modifiedOrder);
+
+                var response = await client.PutAsync(
+                    "/api/order/11",
+                    new StringContent(modifiedOrderAsJSON, Encoding.UTF8, "application/json")
+                );
+                string responseBody = await response.Content.ReadAsStringAsync();
+
+                Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+                /*
+                   GET section
+                   Verify that the PUT operation was successful
+                 */
+                var getOrder = await client.GetAsync("/api/order/11");
+                getOrder.EnsureSuccessStatusCode();
+
+                string getOrderBody = await getOrder.Content.ReadAsStringAsync();
+                Order newOrder = JsonConvert.DeserializeObject<Order>(getOrderBody);
+
+                Assert.Equal(HttpStatusCode.OK, getOrder.StatusCode);
+                Assert.Equal(newPaymentId, newOrder.PaymentTypeId);
+            }
+        }
     }
 }
