@@ -40,9 +40,6 @@ namespace BangazonSprint.Controllers
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
 
-                    //? QUESTION:
-                    //NOTE: Included in this query are the Product Name and Customer Firstname and Lastname. The query was set up this way as a double-check step for verifying the correct ids for the various columns. However, including ProductName, CustomerFirstName and CustomerLastName have not been requested by the Product Manager. Before merging, clear this up with the PM.
-
                     cmd.CommandText = @"SELECT p.Id, p.ProductTypeId, pt.Name AS ProductTypeName, p.CustomerId, c.FirstName AS CustomerFirstName, c.LastName AS CustomerLastName, p.Price, p.Title, p.Description, p.Quantity
                                         FROM Product p
                                         INNER JOIN ProductType pt ON p.ProductTypeId = pt.Id

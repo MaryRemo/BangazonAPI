@@ -1,9 +1,12 @@
 ﻿using System;
+using System.Data;
 using System.Collections.Generic;
-using System.Linq;
+using System.Data.SqlClient;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
 using Microsoft.AspNetCore.Mvc;
+using BangazonSprint.Models;
 
 namespace BangazonSprint.Controllers
 {
@@ -11,19 +14,54 @@ namespace BangazonSprint.Controllers
     [ApiController]
     public class ComputerController : ControllerBase
     {
-        // GET: api/Computer
-        [HttpGet]
-        public IEnumerable<string> Get()
+        private readonly IConfiguration _config;
+
+        public ComputerController(IConfiguration config)
         {
-            return new string[] { "value1", "value2" };
+            _config = config;
+        }
+
+        public SqlConnection Connection
+        {
+            get
+            {
+                return new SqlConnection(_config.GetConnectionString("DefaultConnection"));
+            }
         }
 
         // GET: api/Computer/5
-        [HttpGet("{id}", Name = "GetSingleComputer")]
-        public string Get(int id)
+        [HttpGet]
+        public IActionResult GetAllComputers()
         {
-            return "value";
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"SELECT comp.Id, comp.PurchaseDate, comp.DecomissionDate, comp.Make, comp.Manufacturer
+                                        FROM Computer comp";
+                    SqlDataReader reader = cmd.ExecuteReader();
+                    
+                    List<Computer> computers = new List<Computer>();
+                    while (reader.Read())
+                    {
+                        Computer computer = new Computer
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                            PurchaseDate = reader.GetDateTime(reader.GetOrdinal("PurchaseDate")),
+                            DecomissionDate = reader.GetDateTime(reader.GetOrdinal("DecomissionDate")),
+                            Make = reader.GetString(reader.GetOrdinal("Make")),
+                            Manufacturer = reader.GetString(reader.GetOrdinal("Manufacturer"))
+                        };
+                        computers.Add(computer);
+                    }
+                    reader.Close();
+                    return Ok(computers);
+                }
+            }
         }
+
+        //HMN: Completed manual testing of GetAll and there were no issues.
 
         // POST: api/Computer
         [HttpPost]

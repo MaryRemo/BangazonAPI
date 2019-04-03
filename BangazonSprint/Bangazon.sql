@@ -138,11 +138,13 @@ CREATE TABLE OrderProduct (
     CONSTRAINT FK_OrderProduct_Order FOREIGN KEY(OrderId) REFERENCES [Order](Id)
 );
 
-INSERT INTO Product (ProductTypeId, CustomerId, Price, Title, [Description], Quantity) VALUES (1, 1, 19, 'Drone', 'Super cheap drone', 1);
-INSERT INTO ProductType ([Name]) VALUES ('Tech/Electronics');
-INSERT INTO ProductType ([Name]) VALUES ('Animals');
-INSERT INTO Customer (FirstName, LastName) VALUES ('Bo', 'Bippy');
-INSERT INTO Customer (FirstName, LastName) VALUES ('Peter', 'Petersen');
+--INSERT INTO Product (ProductTypeId, CustomerId, Price, Title, [Description], Quantity) VALUES (1, 1, 19, 'Drone', 'Super cheap drone', 1);
+--INSERT INTO ProductType ([Name]) VALUES ('Tech/Electronics');
+--INSERT INTO ProductType ([Name]) VALUES ('Animals');
+--INSERT INTO Customer (FirstName, LastName) VALUES ('Bo', 'Bippy');
+--INSERT INTO Customer (FirstName, LastName) VALUES ('Peter', 'Petersen');
+INSERT INTO Computer (PurchaseDate, DecomissionDate, Make, Manufacturer) VALUES ((2001-01-01), (2011-01-01), 'Macbook Pro', 'Apple');
+
 
 
 
