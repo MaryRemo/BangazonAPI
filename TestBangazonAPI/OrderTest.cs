@@ -46,23 +46,25 @@ namespace BangazonSprint
         }
 
 
-        /*
+        
         [Fact]
-        public async Task Test_Get_All_PaymentTypes()
+        public async Task Test_Get_All_Orders()
         {
 
             using (var client = new APIClientProvider().Client)
             {
 
-                var response = await client.GetAsync("/api/paymenttype");
+                var response = await client.GetAsync("/api/order");
 
                 string responseBody = await response.Content.ReadAsStringAsync();
-                var paymentTypeList = JsonConvert.DeserializeObject<List<PaymentType>>(responseBody);
+                var orderList = JsonConvert.DeserializeObject<List<Order>>(responseBody);
 
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-                Assert.True(paymentTypeList.Count > 0);
+                Assert.True(orderList.Count > 0);
             }
         }
+
+        /*
 
         [Fact]
         public async Task Test_Modify_PaymentType()

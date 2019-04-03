@@ -168,7 +168,7 @@ namespace BangazonSprint.Controllers
 
         // GET: api/Order/5
         [HttpGet("{id}", Name = "GetSingleOrder")]
-        public Order Get(int id, string include)
+        public Order Get(int id, string include, string completed)
 
         {
             using (SqlConnection conn = Connection)
@@ -218,6 +218,31 @@ namespace BangazonSprint.Controllers
                                     on [order].paymentTypeId = paymentType.id
                                     left join customer
                                     on paymentType.CustomerId = customer.id
+                                   ";
+                    }
+
+                    else if (completed == "false")
+                    {
+                        cmd.CommandText = @"
+                                    select p.id, p.[name], 
+                                    product.id as ProductId, product.ProductTypeId, product.CustomerId, Product.price as ProductPrice, Product.Title as ProductTitle, Product.[Description] as ProductD, Product.Quantity as ProductQ,
+                                    OrderProduct.Id, OrderProduct.OrderId, OrderProduct.ProductId,
+                                    [Order].Id as orderId, [Order].CustomerId, [Order].PaymentTypeId,
+                                    PaymentType.Id, PaymentType.[Name], PaymentType.AcctNumber, PaymentType.CustomerId,
+                                    Customer.Id as CustomerID, Customer.FirstName as CustomerFirstName, Customer.LastName as CustomerLastName
+                                    from productType as p
+                                    left join product 
+                                    on p.id = product.productTypeId
+                                    left join orderProduct 
+                                    on product.id = orderProduct.productid
+                                    left join [order]
+                                    on orderProduct.orderId = [order].id 
+                                    left join PaymentType
+                                    on [order].paymentTypeId = paymentType.id
+                                    left join customer
+                                    on paymentType.CustomerId = customer.id
+                                    
+                                    WHERE [Order].PaymentTypeId = null
                                    ";
                     }
 
@@ -314,7 +339,7 @@ namespace BangazonSprint.Controllers
                        
                         int newId = (int)cmd.ExecuteScalar();
                         order.id = newId;
-                        return CreatedAtRoute("GetOrder", new { id = newId }, order);
+                        return CreatedAtRoute("GetSingleOrder", new { id = newId }, order);
                     }
                 }
             }
