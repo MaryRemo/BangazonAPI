@@ -63,6 +63,41 @@ namespace BangazonSprint.Controllers
 
         //HMN: Completed manual testing of GetAll and there were no issues.
 
+        [HttpGet("{id}", Name = "GetSingleComputer")]
+        public IActionResult GetSingleComputer([FromRoute] int id)
+        {
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"SELECT comp.Id, comp.PurchaseDate, comp.DecomissionDate, comp.Make, comp.Manufacturer
+                                        FROM Computer comp
+                                        WHERE comp.Id = @id";
+                    cmd.Parameters.Add(new SqlParameter("@id", id));
+                    SqlDataReader reader = cmd.ExecuteReader();
+
+                    List<Computer> computers = new List<Computer>();
+                    while (reader.Read())
+                    {
+                        Computer computer = new Computer
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                            PurchaseDate = reader.GetDateTime(reader.GetOrdinal("PurchaseDate")),
+                            DecomissionDate = reader.GetDateTime(reader.GetOrdinal("DecomissionDate")),
+                            Make = reader.GetString(reader.GetOrdinal("Make")),
+                            Manufacturer = reader.GetString(reader.GetOrdinal("Manufacturer"))
+                        };
+                        computers.Add(computer);
+                    }
+                    reader.Close();
+                    return Ok(computers);
+                }
+            }
+        }
+
+        //HMN: Manually tested the GetSingleComputer method and found no errors.
+
         // POST: api/Computer
         [HttpPost]
         public void Post([FromBody] string value)
