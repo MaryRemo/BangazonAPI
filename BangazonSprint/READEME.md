@@ -20,7 +20,7 @@ then replace ```INSERT_DATABASE_NAME``` with the name of your database that you'
 ### 3. PaymentType
 Use the command ```dotnet run``` to start the program, BangazonAPI. Once the program is running, open up the Postman desktop app and run the following commands for each request method:
  ##### GET
- To GET all product types, select GET in Postman then paste ```localhost:5000/PaymentType``` into the field and click send. The result should be an array of all the payment type in the database that should look like:
+ To GET all payment types, select GET in Postman then paste ```localhost:5000/PaymentType``` into the field and click send. The result should be an array of all the payment type in the database that should look like:
  ```
  [
   {
@@ -76,4 +76,52 @@ You should get nothing back from this besides an OK status. When you run the GET
  
  ##### DELETE
  To DELETE an existing product type, select DELETE then paste ```localhost:5000/PaymentType/2``` or any other existing PaymentType then click send. You should get nothing back from this besides an OK status. When you run the GET query the order with the Id you specified in your DELETE query should no longer exist.
+
+ ### 3. ProductType
+Use the command ```dotnet run``` to start the program, BangazonAPI. Once the program is running, open up the Postman desktop app and run the following commands for each request method:
+ ##### GET
+ To GET all product types, select GET in Postman then paste ```localhost:5000/ProductType``` into the field and click send. The result should be an array of all the product types in the database that should look like:
+ ```
+ [
+  {
+    "Id": 1,
+    "Name": "Toys"
+  },
+  {
+    "Id": 2,
+    "Name": "Tools"
+  },
+  {
+    "Id": 3,
+    "Name": "Outdoors"
+  }
+ ]
+ ```
+ To GET a specific, single product type, add an /{id} to the end of the ```localhost:5000/ProductType``` URL. The result should only include the single product type with the Id you added like the below:  
+```
+[
+  {
+    "Id": 1,
+    "Name": "Toys"
+  }
+]
+```
+ ##### POST
+ To POST a new object to your existing array for ProductType, select POST, then paste ```localhost:5000/ProductType``` into the field. Then click Body underneath the field, select raw, and then paste this below snippet or make one similar then click send. The result should be the new ProductType you made:
+```
+{
+	"Name": "Kitchen"
+}
+```
+##### PUT
+ To update an existing ProductType, select PUT then paste ```localhost:5000/productType/2``` or any other existing order. Then follow the same directions as the POST example, and change the values then click send: 
+```
+{
+	"Name": "Furniture"
+}
+```
+You should get nothing back from this besides an OK status. When you run the GET query the computer you specified in your PUT query should show the updated, edited information you gave it.
+ 
+ ##### DELETE
+ To DELETE an existing product type, select DELETE then paste ```localhost:5000/ProductType/2``` or any other existing ProductType then click send. You should get nothing back from this besides an OK status. When you run the GET query the order with the Id you specified in your DELETE query should no longer exist.
 
