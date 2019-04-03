@@ -106,7 +106,7 @@ namespace BangazonSprint
 
                 //HMN: "unjsonizes" the object (productAsJson) and stores it in a new variable, newProduct:
                 var newProduct = JsonConvert.DeserializeObject<Product>(responseBody);
-                                                                                    
+
                 /*
                          HMN Notes: 
                         Created:
@@ -129,83 +129,77 @@ namespace BangazonSprint
             }
         }
 
-        //[Fact]
-        //public async Task TestGetAllProducts()
-        //{
-
-        //    using (var client = new APIClientProvider().Client)
-        //    {
-
-        //        var response = await client.GetAsync("/api/product");
-
-        //        string responseBody = await response.Content.ReadAsStringAsync();
-        //        var productList = JsonConvert.DeserializeObject<List<Product>>(responseBody);
-
-        //        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        //        //NOTE: HMN: How do I know which StatusCode is returned here? 
-        //        Assert.True(productList.Count > 0);
-        //    }
-        //}
-
         [Fact]
         public async Task Test_Modify_Product()
         {
-            int newPrice = 499;
+            string newDescription = "Adorable Fluffy Kitteh";
 
             using (var client = new APIClientProvider().Client)
             {
+                var productGetAgain = await client.GetAsync("api/product");
+                string productGetResponseBody = await productGetAgain.Content.ReadAsStringAsync();
+                //HMN: Use a get to retrieve the products again and translate to a string
 
-                //HMN: Is it really necessary to create a new product to test your PUT? You should only have to get the products again and modify a piece of it. 
+                var productList = JsonConvert.DeserializeObject<List<Product>>(productGetResponseBody);
+                Assert.Equal(HttpStatusCode.OK, productGetAgain.StatusCode);
 
-                Product modifiedProduct = new Product
-                {
-                    ProductTypeId = 2,
-                    CustomerId = 2,
-                    Price = newPrice,
-                    Title = "Kitten",
-                    Description = "Soft kitty, warm kitty, little ball of fur; happy kitty, sleepy kitty, purr purr purr.",
-                    Quantity = 1
+                var productObject = productList[0];
+                var originalProductDescription = JsonConvert.SerializeObject(productObject.Description);
+                productObject.Description = "Adorable Fluffy Kitteh";
+                //Grabs the product object, serializes it, and stores it in a variable called originalProductPrice where the parameter of the serialized object is the object with its new value. The productObject.Price (the parameter of originalProductPrice) is changed and passed in.
 
-                };
+                var editedProductAsJson = JsonConvert.SerializeObject(productObject);
+                var response = await client.PutAsync($"api/product/{productObject.Id}", new StringContent(editedProductAsJson, Encoding.UTF8, "application/json"));
 
-                //HMN: Notes ---------------------------------------------------------------------------------------------------
-                //This is probably what you should be doing for your PUT:
-
-                //var productGetAgain = await client.GetAsync("api/product");
-                //string productGetReponseBody = await productGetAgain.Content.ReadAsStringAsync();
-                ////HMN: Use a get to retrieve the products again and translate to a string
-
-                //var productList = JsonConvert.DeserializeObject<List<Product>>(productGetResponseBody);
-                //Assert.Equal(HttpStatusCode.OK, productGetAgain.StatusCode);
-
-                //var productObject = productList[0];
-
-                //-------------------------------------------------------------------------------------------------------------------
-
-                var modifiedProductAsJSON = JsonConvert.SerializeObject(modifiedProduct);
-
-                //HMN Notes: Serialization is the process of converting an object into a stream of bytes to store the object or transmit it to memory, a database, or a file.Its main purpose is to save the state of an object in order to be able to recreate it when needed.
-
-                var response = await client.PutAsync(
-                    $"/api/product/{productObject.Id}",
-                    //And don't forget that the id will use string interpolation! ^^^^ P.S.: You haven't defined the "productObject" yet; if you were creating a new instance of one you could call it this but how about just getting the product list again. That makes more sense.
-                    new StringContent(modifiedProductAsJSON, Encoding.UTF8, "application/json")
-                );
                 string responseBody = await response.Content.ReadAsStringAsync();
-
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-                var getPrice = await client.GetAsync($"/api/product/{productObject.Id}");
-                getPrice.EnsureSuccessStatusCode();
+                var getProduct = await client.GetAsync($"/api/product/{productObject.Id}");
+                getProduct.EnsureSuccessStatusCode();
 
-                string getPriceBody = await getPrice.Content.ReadAsStringAsync();
-                Product NewPrice = JsonConvert.DeserializeObject<Product>(getPriceBody);
+                string getProductBody = await getProduct.Content.ReadAsStringAsync();
+                Product newProduct = JsonConvert.DeserializeObject<Product>(getProductBody);
 
-                Assert.Equal(HttpStatusCode.OK, getPrice.StatusCode);
-                Assert.Equal(newPrice, NewPrice.Price);
+                Assert.Equal(HttpStatusCode.OK, getProduct.StatusCode);
+                Assert.Equal(newDescription, newProduct.Description);
+
+                newProduct.Description = originalProductDescription;
+                var returnEditedProductToOriginalProduct = JsonConvert.SerializeObject(newProduct);
+
+                var putEditedProductToOriginalProduct = await client.PutAsync($"api/product/{newProduct.Id}",
+                new StringContent(returnEditedProductToOriginalProduct, Encoding.UTF8, "application/json"));
+                string originalProductObject = await response.Content.ReadAsStringAsync();
+                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            }
+        }
+
+        [Fact]
+        public async Task Test_Delete_Product()
+        {
+            using (var client = new APIClientProvider().Client)
+            {
+                var productGetInitialResponse = await client.GetAsync("api/product");
+                string initialResponseBody = await productGetInitialResponse.Content.ReadAsStringAsync();
+                var productList = JsonConvert.DeserializeObject<List<Product>>(initialResponseBody);
+
+                Assert.Equal(HttpStatusCode.OK, productGetInitialResponse.StatusCode);
+
+                int deleteLastProductObject = productList.Count - 1;
+                var productObject = productList[deleteLastProductObject];
+
+                var response = await client.DeleteAsync($"api/product/{productObject.Id}");
+                string responseBody = await response.Content.ReadAsStringAsync();
+
+                //Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+                var getProduct = await client.GetAsync($"api/product/{productObject.Id}");
+                getProduct.EnsureSuccessStatusCode();
+
+                string getProductBody = await getProduct.Content.ReadAsStringAsync();
+                Product newProduct = JsonConvert.DeserializeObject<Product>(getProductBody);
+
+                Assert.Equal(HttpStatusCode.NoContent, getProduct.StatusCode);
             }
         }
     }
-
-    //Don't forget your delete test!!!!
 }

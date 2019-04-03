@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
-namespace BangazonSprintStartUp
+namespace BangazonSprint
 {
     public class Program
     {
