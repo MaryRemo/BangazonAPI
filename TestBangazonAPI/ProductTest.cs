@@ -53,10 +53,9 @@ namespace BangazonSprint
         [Fact]
         public async Task Test_Get_Single_Product()
         {
-
             using (var client = new APIClientProvider().Client)
             {
-                var productGetInitialResponse = await client.GetAsync("api/products");
+                var productGetInitialResponse = await client.GetAsync("api/product");
 
                 string initialResponseBody = await productGetInitialResponse.Content.ReadAsStringAsync();
 
@@ -66,7 +65,7 @@ namespace BangazonSprint
 
                 var productObject = productList[0];
 
-                var response = await client.GetAsync($"api/products/{productObject.Id}");
+                var response = await client.GetAsync($"api/product/{productObject.Id}");
 
                 string responseBody = await response.Content.ReadAsStringAsync();
 
@@ -155,6 +154,9 @@ namespace BangazonSprint
 
             using (var client = new APIClientProvider().Client)
             {
+
+                //HMN: Is it really necessary to create a new product to test your PUT? You should only have to get the products again and modify a piece of it. 
+
                 Product modifiedProduct = new Product
                 {
                     ProductTypeId = 2,
@@ -165,19 +167,35 @@ namespace BangazonSprint
                     Quantity = 1
 
                 };
+
+                //HMN: Notes ---------------------------------------------------------------------------------------------------
+                //This is probably what you should be doing for your PUT:
+
+                //var productGetAgain = await client.GetAsync("api/product");
+                //string productGetReponseBody = await productGetAgain.Content.ReadAsStringAsync();
+                ////HMN: Use a get to retrieve the products again and translate to a string
+
+                //var productList = JsonConvert.DeserializeObject<List<Product>>(productGetResponseBody);
+                //Assert.Equal(HttpStatusCode.OK, productGetAgain.StatusCode);
+
+                //var productObject = productList[0];
+
+                //-------------------------------------------------------------------------------------------------------------------
+
                 var modifiedProductAsJSON = JsonConvert.SerializeObject(modifiedProduct);
 
                 //HMN Notes: Serialization is the process of converting an object into a stream of bytes to store the object or transmit it to memory, a database, or a file.Its main purpose is to save the state of an object in order to be able to recreate it when needed.
 
                 var response = await client.PutAsync(
-                    "/api/product/6",
+                    $"/api/product/{productObject.Id}",
+                    //And don't forget that the id will use string interpolation! ^^^^ P.S.: You haven't defined the "productObject" yet; if you were creating a new instance of one you could call it this but how about just getting the product list again. That makes more sense.
                     new StringContent(modifiedProductAsJSON, Encoding.UTF8, "application/json")
                 );
                 string responseBody = await response.Content.ReadAsStringAsync();
 
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-                var getPrice = await client.GetAsync("/api/product/6");
+                var getPrice = await client.GetAsync($"/api/product/{productObject.Id}");
                 getPrice.EnsureSuccessStatusCode();
 
                 string getPriceBody = await getPrice.Content.ReadAsStringAsync();
@@ -188,4 +206,6 @@ namespace BangazonSprint
             }
         }
     }
+
+    //Don't forget your delete test!!!!
 }
