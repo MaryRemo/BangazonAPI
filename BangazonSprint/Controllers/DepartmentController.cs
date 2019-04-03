@@ -108,32 +108,70 @@ namespace BangazonSprint.Controllers
 
         // GET: api/Department/5
         [HttpGet("{id}", Name = "GetSingleDepartment")]
-        public Department Get(int id)
+        public IActionResult Get(string include, int id)
         {
             using (SqlConnection conn = Connection)
             {
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
-                    cmd.CommandText = @"SELECT d.id as DeptmentId, d.[name], d.budget
-                                        FROM Department d
-                                        WHERE d.id = @id;";
+                    if (include == "employees")
+                    {
+                        cmd.CommandText = @"SELECT d.id as DeptmentId, d.[name], d.budget, e.firstname, e.lastname, e.id as EmployeeId
+                                            FROM Department d INNER JOIN Employee e ON e.DepartmentId = d.id
+                                         WHERE d.id = @id";
+                    }
+                    else
+                    {
+                        cmd.CommandText = @"SELECT d.id as DeptmentId, d.[name], d.budget
+                                            FROM Department d
+                                         WHERE d.id = @id";
+                    }
                     cmd.Parameters.Add(new SqlParameter("@id", id));
                     SqlDataReader reader = cmd.ExecuteReader();
 
-                    Department department = null;
-                    if (reader.Read())
+                    Dictionary<int, Department> departments = new Dictionary<int, Department>();
+                    while (reader.Read())
                     {
-                        department = new Department
+                        int departmentId = reader.GetInt32(reader.GetOrdinal("DeptmentId"));
+                        if (!departments.ContainsKey(departmentId))
                         {
-                            Id = reader.GetInt32(reader.GetOrdinal("DeptmentId")),
-                            Name = reader.GetString(reader.GetOrdinal("name")),
-                            Budget = reader.GetInt32(reader.GetOrdinal("budget")),
-                        };
+                            Department newDepartment = new Department
+                            {
+                                Id = departmentId,
+                                Name = reader.GetString(reader.GetOrdinal("Name")),
+                                Budget = reader.GetInt32(reader.GetOrdinal("Budget"))
+                            };
+
+                            departments.Add(departmentId, newDepartment);
+                        }
+
+                        if (include == "employees")
+                        {
+                            if (!reader.IsDBNull(reader.GetOrdinal("EmployeeId")))
+                            {
+                                Department currentDepartment = departments[departmentId];
+                                currentDepartment.employees.Add(
+                                    new Employee
+                                    {
+                                        Id = reader.GetInt32(reader.GetOrdinal("EmployeeId")),
+                                        FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
+                                        LastName = reader.GetString(reader.GetOrdinal("LastName")),
+                                    }
+                                );
+                            }
+                        }
                     }
 
                     reader.Close();
-                    return department;
+                    if (departments.Count == 0)
+                    {
+                        return NoContent();
+                    }
+                    else
+                    {
+                        return Ok(departments);
+                    }
                 }
             }
         }
