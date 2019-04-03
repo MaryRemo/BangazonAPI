@@ -45,47 +45,43 @@ namespace BangazonSprint.Controllers
                     if (include == "products")
                     {
                         cmd.CommandText = @"
-                                    select p.id, p.[name], 
-                                    product.id as ProductId, product.ProductTypeId, product.CustomerId, Product.price as ProductPrice, Product.Title as ProductTitle, Product.[Description] as ProductD, Product.Quantity as ProductQ,
-                                    OrderProduct.Id, OrderProduct.OrderId, OrderProduct.ProductId,
-                                    [Order].Id, [Order].CustomerId, [Order].PaymentTypeId,
-                                    PaymentType.Id, PaymentType.[Name], PaymentType.AcctNumber, PaymentType.CustomerId,
-                                    Customer.Id as CustomerID, Customer.FirstName as CustomerFirstName, Customer.LastName as CustomerLastName
-                                    from productType as p
-                                    left join product 
-                                    on p.id = product.productTypeId
-                                    left join orderProduct 
-                                    on product.id = orderProduct.productid
-                                    left join [order]
-                                    on orderProduct.orderId = [order].id 
-                                    left join PaymentType
-                                    on [order].paymentTypeId = paymentType.id
-                                    left join customer
-                                    on paymentType.CustomerId = customer.id
-                                    WHERE 1 = 1";
+                                    select 
+	                                [Order].Id, [Order].CustomerId, [Order].PaymentTypeId,
+	                                PaymentType.Id, PaymentType.[Name], PaymentType.AcctNumber, PaymentType.CustomerId,
+	                                Customer.Id as CustomerID, Customer.FirstName as CustomerFirstName, Customer.LastName as CustomerLastName,
+
+		                            Product.Id as ProductId, Product.Title as ProductTitle, Product.ProductTypeId, Product.CustomerId, Product.[Description] as ProductD, Product.Quantity as ProductQ, Product.Price as Price,
+
+
+	                                OrderProduct.Id, OrderProduct.OrderId, OrderProduct.ProductId
+
+	                                from [order]
+	                                left join paymentType
+	                                on PaymentType.id =[order].paymentTypeId
+	                                left join customer
+	                                on paymentType.CustomerId = customer.id
+                                    left join [OrderProduct]
+	                                on [OrderProduct].OrderId = [Order].id
+		                            left join [Product]
+		                            on OrderProduct.ProductId = Product.Id";
                     }
 
                     else if (include == "customers")
                     {
                         cmd.CommandText = @"
-                                    select p.id, p.[name], 
-                                    product.id as ProductId, product.ProductTypeId, product.CustomerId, Product.price as ProductPrice, Product.Title as ProductTitle, Product.[Description] as ProductD, Product.Quantity as ProductQ,
-                                    OrderProduct.Id, OrderProduct.OrderId, OrderProduct.ProductId,
-                                    [Order].Id, [Order].CustomerId, [Order].PaymentTypeId,
-                                    PaymentType.Id, PaymentType.[Name], PaymentType.AcctNumber, PaymentType.CustomerId,
-                                    Customer.Id as CustomerID, Customer.FirstName as CustomerFirstName, Customer.LastName as CustomerLastName
-                                    from productType as p
-                                    left join product 
-                                    on p.id = product.productTypeId
-                                    left join orderProduct 
-                                    on product.id = orderProduct.productid
-                                    left join [order]
-                                    on orderProduct.orderId = [order].id 
-                                    left join PaymentType
-                                    on [order].paymentTypeId = paymentType.id
-                                    left join customer
-                                    on paymentType.CustomerId = customer.id
-                                    WHERE 1 = 1";
+                                    select 
+	                                [Order].Id, [Order].CustomerId, [Order].PaymentTypeId,
+	                                PaymentType.Id, PaymentType.[Name], PaymentType.AcctNumber, PaymentType.CustomerId,
+	                                Customer.Id as CustomerID, Customer.FirstName as CustomerFirstName, Customer.LastName as CustomerLastName,
+	                                OrderProduct.Id, OrderProduct.OrderId, OrderProduct.ProductId
+	                                from [order]
+	                                left join paymentType
+	                                on PaymentType.id =[order].paymentTypeId
+	                                left join customer
+	                                on paymentType.CustomerId = customer.id
+                                    left join [OrderProduct]
+	                                on [OrderProduct].OrderId = [Order].id
+                                    ";
                     }
 
                     else
@@ -121,9 +117,11 @@ namespace BangazonSprint.Controllers
                             };
 
                             orders.Add(orderId, newOrder);
-                        }
+                        } 
 
-                        if (include == "products")
+                            
+
+                            if (include == "products")
                         {
                             if (!reader.IsDBNull(reader.GetOrdinal("productId")))
                             {
@@ -133,7 +131,7 @@ namespace BangazonSprint.Controllers
                                     {
                                         Id = reader.GetInt32(reader.GetOrdinal("ProductId")),
                                         Title = reader.GetString(reader.GetOrdinal("ProductTitle")),
-                                        Price = reader.GetInt32(reader.GetOrdinal("ProductPrice")),
+                                        Price = reader.GetInt32(reader.GetOrdinal("Price")),
                                         Description = reader.GetString(reader.GetOrdinal("ProductD")),
                                         Quantitiy = reader.GetInt32(reader.GetOrdinal("ProductQ"))
                                     }
@@ -156,262 +154,232 @@ namespace BangazonSprint.Controllers
                             }
                         }
                     }
-                reader.Close();
+                    reader.Close();
 
-                return orders.Values.ToList();
+                    return orders.Values.ToList();
+                }
             }
         }
-    }
-}
 
-        /*
 
-<<<<<<< HEAD
-        // GET: api/Students/5?include=exercise
-        [HttpGet("{id}", Name = "GetSingleOrder")]
-        public Students Get(int id, string include)
-=======
+
+
+
+
         // GET: api/Order/5
         [HttpGet("{id}", Name = "GetSingleOrder")]
-        public string Get(int id)
->>>>>>> master
+        public Order Get(int id, string include)
+
         {
             using (SqlConnection conn = Connection)
             {
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
-                    if (include == "exercise")
+                    if (include == "products")
                     {
-                        cmd.CommandText = @"select s.id as StudentId,
-                                               s.FirstName,
-                                               s.LastName,
-                                               s.SlackHandle,
-                                               s.CohortId,
-                                               c.[Name] as CohortName,
-                                               e.id as ExerciseId,
-                                               e.[name] as ExerciseName,
-                                               e.[Language]
-                                          from student s
-                                               left join Cohort c on s.CohortId = c.id
-                                               left join StudentExercise se on s.id = se.studentid
-                                               left join Exercise e on se.exerciseid = e.id";
+                        cmd.CommandText = @"
+                                    select p.id, p.[name], 
+                                    product.id as ProductId, product.ProductTypeId, product.CustomerId, Product.price as ProductPrice, Product.Title as ProductTitle, Product.[Description] as ProductD, Product.Quantity as ProductQ,
+                                    OrderProduct.Id, OrderProduct.OrderId, OrderProduct.ProductId,
+                                    [Order].Id as orderId, [Order].CustomerId, [Order].PaymentTypeId,
+                                    PaymentType.Id, PaymentType.[Name], PaymentType.AcctNumber, PaymentType.CustomerId,
+                                    Customer.Id as CustomerID, Customer.FirstName as CustomerFirstName, Customer.LastName as CustomerLastName
+                                    from productType as p
+                                    left join product 
+                                    on p.id = product.productTypeId
+                                    left join orderProduct 
+                                    on product.id = orderProduct.productid
+                                    left join [order]
+                                    on orderProduct.orderId = [order].id 
+                                    left join PaymentType
+                                    on [order].paymentTypeId = paymentType.id
+                                    left join customer
+                                    on paymentType.CustomerId = customer.id
+                                    ";
                     }
-                    else
+                    else if (include == "customers")
                     {
-                        cmd.CommandText = @"select s.id as StudentId,
-                                               s.FirstName,
-                                               s.LastName,
-                                               s.SlackHandle,
-                                               s.CohortId,
-                                               c.[Name] as CohortName
-                                          from student s
-                                               left join Cohort c on s.CohortId = c.id";
+                        cmd.CommandText = @"
+                                    select p.id, p.[name], 
+                                    product.id as ProductId, product.ProductTypeId, product.CustomerId, Product.price as ProductPrice, Product.Title as ProductTitle, Product.[Description] as ProductD, Product.Quantity as ProductQ,
+                                    OrderProduct.Id, OrderProduct.OrderId, OrderProduct.ProductId,
+                                    [Order].Id as orderId, [Order].CustomerId, [Order].PaymentTypeId,
+                                    PaymentType.Id, PaymentType.[Name], PaymentType.AcctNumber, PaymentType.CustomerId,
+                                    Customer.Id as CustomerID, Customer.FirstName as CustomerFirstName, Customer.LastName as CustomerLastName
+                                    from productType as p
+                                    left join product 
+                                    on p.id = product.productTypeId
+                                    left join orderProduct 
+                                    on product.id = orderProduct.productid
+                                    left join [order]
+                                    on orderProduct.orderId = [order].id 
+                                    left join PaymentType
+                                    on [order].paymentTypeId = paymentType.id
+                                    left join customer
+                                    on paymentType.CustomerId = customer.id
+                                   ";
                     }
 
-                    cmd.CommandText += " WHERE s.id = @id";
+                    else
+                    {
+                        cmd.CommandText = @"
+                                         select * from [order]
+                                         ";
+                    }
+
+                    cmd.CommandText += " WHERE id = @id";
                     cmd.Parameters.Add(new SqlParameter("@id", id));
 
                     SqlDataReader reader = cmd.ExecuteReader();
 
-                    Students student = null;
+                    Order order = null;
                     while (reader.Read())
                     {
-                        if (student == null)
+                        if (order == null)
                         {
-                            student = new Students
+                            order = new Order
                             {
-                                Id = id,
-                                FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
-                                LastName = reader.GetString(reader.GetOrdinal("LastName")),
-                                SlackHandle = reader.GetString(reader.GetOrdinal("SlackHandle")),
-                                CohortId = reader.GetInt32(reader.GetOrdinal("CohortId")),
-                                Cohort = new Cohort
-                                {
-                                    id = reader.GetInt32(reader.GetOrdinal("CohortId")),
-                                    cohortName = reader.GetString(reader.GetOrdinal("CohortName"))
-                                }
+                                id = id,
+                                CustomerId = reader.GetInt32(reader.GetOrdinal("CustomerId")),
+                                PaymentTypeId = reader.GetInt32(reader.GetOrdinal("PaymentTypeId")),
                             };
+
+
                         }
 
-                        if (include == "exercise")
+                        if (include == "products")
                         {
-                            if (!reader.IsDBNull(reader.GetOrdinal("ExerciseId")))
+                            if (!reader.IsDBNull(reader.GetOrdinal("productId")))
                             {
-                                student.Exercises.Add(
-                                    new Exercises
+                                if (!order.Products.Exists(x => x.Id == reader.GetInt32(reader.GetOrdinal("ProductId"))))
+                                {
+                                    order.Products.Add(
+                                        new Product
+                                        {
+                                            Id = reader.GetInt32(reader.GetOrdinal("ProductId")),
+                                            Title = reader.GetString(reader.GetOrdinal("ProductTitle")),
+                                            Price = reader.GetInt32(reader.GetOrdinal("ProductPrice")),
+                                            Description = reader.GetString(reader.GetOrdinal("ProductD")),
+                                            Quantitiy = reader.GetInt32(reader.GetOrdinal("ProductQ"))
+                                        }
+                                    );
+                                }
+                            }
+                        }
+
+                        if (include == "customers")
+                        {
+                            if (!reader.IsDBNull(reader.GetOrdinal("CustomerId")))
+                            {
+                                if (!order.Products.Exists(x => x.Id == reader.GetInt32(reader.GetOrdinal("ProductId"))))
+                                {
+
+                                    order.Customers.Add(
+                                    new Customer
                                     {
-                                        Id = reader.GetInt32(reader.GetOrdinal("ExerciseId")),
-                                        Language = reader.GetString(reader.GetOrdinal("Language")),
-                                        Name = reader.GetString(reader.GetOrdinal("ExerciseName")),
+                                        Id = reader.GetInt32(reader.GetOrdinal("CustomerId")),
+                                        FirstName = reader.GetString(reader.GetOrdinal("CustomerFirstName")),
+                                        LastName = reader.GetString(reader.GetOrdinal("CustomerLastName")),
                                     }
-                                );
+                                 );
+                                }
                             }
                         }
                     }
 
                     reader.Close();
 
-                    return student;
+                    return order;
                 }
             }
         }
 
 
 
-
-        [HttpPost]
-        public async Task<IActionResult> Post([FromBody] Students student)
-        {
-            using (SqlConnection conn = Connection)
-            {
-                conn.Open();
-                using (SqlCommand cmd = conn.CreateCommand())
-                {
-                    cmd.CommandText = @"INSERT INTO Student (FirstName, LastName, SlackHandle, cohortId)
-                                        OUTPUT INSERTED.Id
-                                        VALUES (@FirstName, @LastName, @SlackHandle, @cohortId)";
-                    cmd.Parameters.Add(new SqlParameter("@FirstName", student.FirstName));
-                    cmd.Parameters.Add(new SqlParameter("@LastName", student.LastName));
-                    cmd.Parameters.Add(new SqlParameter("@SlackHandle", student.SlackHandle));
-                    cmd.Parameters.Add(new SqlParameter("@cohortId", student.CohortId));
-
-
-
-                    int newId = (int)cmd.ExecuteScalar();
-                    student.Id = newId;
-                    return CreatedAtRoute("GetStudent", new { id = newId }, student);
-                }
-            }
-        }
-
-
-        [HttpPut("{id}")]
-        public async Task<IActionResult> Put([FromRoute] int id, [FromBody] Students student)
-        {
-            try
+        
+            [HttpPost]
+            public IActionResult Post([FromBody] Order order)
             {
                 using (SqlConnection conn = Connection)
                 {
                     conn.Open();
                     using (SqlCommand cmd = conn.CreateCommand())
                     {
-                        cmd.CommandText = @"UPDATE Student
-                                            SET FirstName = @FirstName,
-                                                LastName = @LastName,
-                                                SlackHandle = @SlackHandle,
-                                                cohortId = @cohortId
-                                                
-                                            WHERE student.Id = @id";
-                        cmd.Parameters.Add(new SqlParameter("@FirstName", student.FirstName));
-                        cmd.Parameters.Add(new SqlParameter("@LastName", student.LastName));
-                        cmd.Parameters.Add(new SqlParameter("@SlackHandle", student.SlackHandle));
-                        cmd.Parameters.Add(new SqlParameter("@cohortId", student.CohortId));
-                        cmd.Parameters.Add(new SqlParameter("@id", id));
-
-                        int rowsAffected = cmd.ExecuteNonQuery();
-                        if (rowsAffected > 0)
-                        {
-                            return new StatusCodeResult(StatusCodes.Status204NoContent);
-                        }
-                        throw new Exception("No rows affected");
+                        cmd.CommandText = @"INSERT INTO [order] (CustomerId, PaymentTypeId)
+                                            OUTPUT INSERTED.Id
+                                            VALUES (@CustomerId, @PaymentTypeId)";
+                        cmd.Parameters.Add(new SqlParameter("@CustomerId", order.CustomerId));
+                        cmd.Parameters.Add(new SqlParameter("@PaymentTypeId", order.PaymentTypeId));
+                       
+                        int newId = (int)cmd.ExecuteScalar();
+                        order.id = newId;
+                        return CreatedAtRoute("GetOrder", new { id = newId }, order);
                     }
                 }
             }
-            catch (Exception)
-            {
-                if (!StudentsExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+            
+
+            [HttpPut("{id}")]
+            public IActionResult Put([FromRoute] int id, [FromBody] Order order)
+            {                             
+                    using (SqlConnection conn = Connection)
+                    {
+                        conn.Open();
+                        using (SqlCommand cmd = conn.CreateCommand())
+                        {
+                            cmd.CommandText = @"UPDATE [Order]
+                                                SET 
+                                                PaymentTypeId = @PaymentTypeId                                             
+                                                WHERE [order].id = @id";
+                            cmd.Parameters.Add(new SqlParameter("@PaymentTypeId", order.PaymentTypeId));
+                            cmd.Parameters.Add(new SqlParameter("@id", id));
+
+                            int rowsAffected = cmd.ExecuteNonQuery();
+                            if (rowsAffected > 0)
+                            {
+                                return new StatusCodeResult(StatusCodes.Status204NoContent);
+                            }
+                            throw new Exception("No rows affected");
+                        }
+                    }                         
             }
-        }
 
-
+        
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete([FromRoute] int id)
-        {
-            try
-            {
-                using (SqlConnection conn = Connection)
-                {
-                    conn.Open();
-
-                    using (SqlCommand cmd = conn.CreateCommand())
-                    {
-
-
-                        cmd.CommandText = @"DELETE FROM StudentExercise WHERE StudentId = @id"; ;
-
-                        cmd.Parameters.Add(new SqlParameter("@id", id));
-
-                        int rowsAffected = cmd.ExecuteNonQuery();
-                        /*
-                        if (rowsAffected > 0)
-                        {
-                            return new StatusCodeResult(StatusCodes.Status204NoContent);
-                        }
-                        throw new Exception("No rows affected");
-                        */
-                    }
-
-    /*
-
-                    using (SqlCommand cmd = conn.CreateCommand())
-                    {
-
-
-                        cmd.CommandText = @"DELETE FROM Student WHERE Id = @id";
-
-                        cmd.Parameters.Add(new SqlParameter("@id", id));
-
-                        int rowsAffected = cmd.ExecuteNonQuery();
-                        if (rowsAffected > 0)
-                        {
-                            return new StatusCodeResult(StatusCodes.Status204NoContent);
-                        }
-                        throw new Exception("No rows affected");
-                    }
-
-                }
-            }
-            catch (Exception ex)
-            {
-                if (!StudentsExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-        }
-
-        private bool StudentsExists(int id)
+        public IActionResult DeleteOrder([FromRoute] int id)
         {
             using (SqlConnection conn = Connection)
             {
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
-                    cmd.CommandText = @"
-                         SELECT student.Id, FirstName, LastName, SlackHandle, cohortId, name from Student " +
-                        "LEFT JOIN Cohort " +
-                        "ON student.CohortId = Cohort.Id " +
-                        "WHERE student.Id = @id";
+                    cmd.CommandText = "DELETE FROM OrderProduct WHERE Id = @id";
                     cmd.Parameters.Add(new SqlParameter("@id", id));
 
-                    SqlDataReader reader = cmd.ExecuteReader();
-                    return reader.Read();
+                    int rowsAffected = cmd.ExecuteNonQuery();
                 }
+
+
+                
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = "DELETE FROM [order] WHERE Id = @id";
+                    cmd.Parameters.Add(new SqlParameter("@id", id));
+
+                    int rowsAffected = cmd.ExecuteNonQuery();
+                    if (rowsAffected > 0)
+                    {
+                        return NoContent();
+                    }
+                    throw new Exception("No rows affected");
+                }
+                
             }
         }
-    }
-     */
 
+
+
+    }
+}
