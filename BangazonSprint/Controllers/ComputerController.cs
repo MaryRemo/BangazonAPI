@@ -41,7 +41,7 @@ namespace BangazonSprint.Controllers
                     cmd.CommandText = @"SELECT comp.Id, comp.PurchaseDate, comp.DecomissionDate, comp.Make, comp.Manufacturer
                                         FROM Computer comp";
                     SqlDataReader reader = cmd.ExecuteReader();
-                    
+
                     List<Computer> computers = new List<Computer>();
                     while (reader.Read())
                     {
@@ -155,8 +155,25 @@ namespace BangazonSprint.Controllers
 
         // DELETE: api/ApiWithActions/5
         [HttpDelete("{id}")]
-        public void Delete(int id)
+        public IActionResult DeleteComputer([FromRoute] int id)
         {
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = "DELETE FROM Computer WHERE Id = @id";
+                    cmd.Parameters.Add(new SqlParameter("@id", id));
+
+                    int rowsAffected = cmd.ExecuteNonQuery();
+                    if (rowsAffected > 0)
+                    {
+                        return NoContent();
+                    }
+                    throw new Exception("No rows affected");
+                }
+            }
         }
     }
+    // HMN: Manually tested DELETE and found no errors
 }
