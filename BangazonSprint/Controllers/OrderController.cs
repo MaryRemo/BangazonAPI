@@ -162,7 +162,7 @@ namespace BangazonSprint.Controllers
                                         Title = reader.GetString(reader.GetOrdinal("ProductTitle")),
                                         Price = reader.GetInt32(reader.GetOrdinal("Price")),
                                         Description = reader.GetString(reader.GetOrdinal("ProductD")),
-                                        Quantitiy = reader.GetInt32(reader.GetOrdinal("ProductQ"))
+                                        Quantity = reader.GetInt32(reader.GetOrdinal("ProductQ"))
                                     }
                                 );
                             }
@@ -378,7 +378,7 @@ namespace BangazonSprint.Controllers
                                             Title = reader.GetString(reader.GetOrdinal("ProductTitle")),
                                             Price = reader.GetInt32(reader.GetOrdinal("ProductPrice")),
                                             Description = reader.GetString(reader.GetOrdinal("ProductD")),
-                                            Quantitiy = reader.GetInt32(reader.GetOrdinal("ProductQ"))
+                                            Quantity = reader.GetInt32(reader.GetOrdinal("ProductQ"))
                                         }
                                     );
                                 }
