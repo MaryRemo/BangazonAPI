@@ -64,7 +64,7 @@ namespace BangazonSprint.Controllers
         //HMN: Completed manual testing of GetAll and there were no issues.
 
         [HttpGet("{id}", Name = "GetSingleComputer")]
-        public IActionResult GetSingleComputer([FromRoute] int id)
+        public Computer GetSingleComputer([FromRoute] int id)
         {
             using (SqlConnection conn = Connection)
             {
@@ -77,10 +77,10 @@ namespace BangazonSprint.Controllers
                     cmd.Parameters.Add(new SqlParameter("@id", id));
                     SqlDataReader reader = cmd.ExecuteReader();
 
-                    List<Computer> computers = new List<Computer>();
-                    while (reader.Read())
+                    Computer computer = null;
+                    if (reader.Read())
                     {
-                        Computer computer = new Computer
+                         computer = new Computer
                         {
                             Id = reader.GetInt32(reader.GetOrdinal("Id")),
                             PurchaseDate = reader.GetDateTime(reader.GetOrdinal("PurchaseDate")),
@@ -88,10 +88,9 @@ namespace BangazonSprint.Controllers
                             Make = reader.GetString(reader.GetOrdinal("Make")),
                             Manufacturer = reader.GetString(reader.GetOrdinal("Manufacturer"))
                         };
-                        computers.Add(computer);
                     }
                     reader.Close();
-                    return Ok(computers);
+                    return computer;
                 }
             }
         }

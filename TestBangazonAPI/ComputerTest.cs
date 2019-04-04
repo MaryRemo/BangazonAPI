@@ -32,40 +32,62 @@ namespace BangazonSprint
         }
 
         [Fact]
-        public async Task Test_Get_Single_Computer()
+        //public async Task Test_Get_Single_Computer()
+        //{
+        //    using (var client = new APIClientProvider().Client)
+        //    {
+        //        var computerGetInitialResponse = await client.GetAsync("api/computer");
+
+        //        string initialResponseBody = await computerGetInitialResponse.Content.ReadAsStringAsync();
+
+        //        var computerList = JsonConvert.DeserializeObject<List<Product>>(initialResponseBody);
+
+        //        Assert.Equal(HttpStatusCode.OK, computerGetInitialResponse.StatusCode);
+
+        //        var computerObject = computerList[0];
+
+        //        //var response = await client.GetAsync($"api/computer/{computerObject.Id}");
+        //        var response = await client.GetAsync($"api/computer/1");
+
+
+        //        string responseBody = await response.Content.ReadAsStringAsync();
+
+        //        var computerReturned = JsonConvert.DeserializeObject<Computer>(responseBody);
+
+        //        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        //        Assert.True(computerReturned.Id == computerObject.Id);
+        //    }
+        //}
+
+
+
+        public async Task Test_Get_Computer_By_Id()
         {
             using (var client = new APIClientProvider().Client)
             {
-                var computerGetInitialResponse = await client.GetAsync("api/computer");
-
-                string initialResponseBody = await computerGetInitialResponse.Content.ReadAsStringAsync();
-
-                var computerList = JsonConvert.DeserializeObject<List<Product>>(initialResponseBody);
-
-                Assert.Equal(HttpStatusCode.OK, computerGetInitialResponse.StatusCode);
-
-                var computerObject = computerList[0];
-
-                var response = await client.GetAsync($"api/computer/{computerObject.Id}");
+                var response = await client.GetAsync("api/computer/1");
 
                 string responseBody = await response.Content.ReadAsStringAsync();
 
-                var computerReturned = JsonConvert.DeserializeObject<Computer>(responseBody);
+                var computer = JsonConvert.DeserializeObject<Computer>(responseBody);
 
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-                Assert.True(computerReturned.Id == computerObject.Id);
+                Assert.NotNull(computer.Make);
             }
         }
+  
 
-        [Fact]
+
+
+    [Fact]
         public async Task Test_Create_Computer()
         {
             using (var client = new APIClientProvider().Client)
             {
                 Computer computer = new Computer
                 {
-                    PurchaseDate = new DateTime(1999-01-01),
-                    DecomissionDate = new DateTime(2002-05-05),
+                    PurchaseDate = new DateTime(1999, 01, 01),
+                    DecomissionDate = new DateTime(2002, 05, 05),
                     Make = "Macbook Pro",
                     Manufacturer = "Apple"
                 };
@@ -91,46 +113,43 @@ namespace BangazonSprint
         [Fact]
         public async Task Test_Edit_Computer()
         {
-            string newMake = "iMac Pro";
 
             using (var client = new APIClientProvider().Client)
             {
-                var computerGetAgain = await client.GetAsync("api/computer");
-                string computerGetResponseBody = await computerGetAgain.Content.ReadAsStringAsync();
 
-                var computerList = JsonConvert.DeserializeObject<List<Computer>>(computerGetResponseBody);
-                Assert.Equal(HttpStatusCode.OK, computerGetAgain.StatusCode);
+                string newMake = "XPS 13";
+                Computer computer = new Computer
+                {
+                    PurchaseDate = new DateTime(1999, 2, 16),
+                    DecomissionDate = new DateTime(1994, 5, 26),
+                    Make = newMake,
+                    Manufacturer = "Dell"
+                };
 
-                var computerObject = computerList[0];
-                var originalComputerMake = JsonConvert.SerializeObject(computerObject.Make);
-                var computerObjectMake = "iMac Pro";
+                var modifiedComputerAsJSON = JsonConvert.SerializeObject(computer);
 
-                var editedComputerAsJson = JsonConvert.SerializeObject(computerObject);
-                var response = await client.PutAsync($"api/computer/{computerObject.Id}", new StringContent(editedComputerAsJson, Encoding.UTF8, "application/json"));
-
+                var response = await client.PutAsync(
+                    "/api/computer/1",
+                    new StringContent(modifiedComputerAsJSON, Encoding.UTF8, "application/json")
+                );
                 string responseBody = await response.Content.ReadAsStringAsync();
+
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-                var getComputer = await client.GetAsync($"/api/computer/{computerObject.Id}");
-                getComputer.EnsureSuccessStatusCode();
+                var getmax = await client.GetAsync("/api/Computer");
+                getmax.EnsureSuccessStatusCode();
 
-                string getComputerBody = await getComputer.Content.ReadAsStringAsync();
-                Computer newComputer = JsonConvert.DeserializeObject<Computer>(getComputerBody);
-
-                Assert.Equal(HttpStatusCode.OK, getComputer.StatusCode);
-                Assert.Equal(newMake, newComputer.Make);
-
-                newComputer.Make = originalComputerMake;
-                var returnEditedComputerToOriginalProduct = JsonConvert.SerializeObject(newComputer);
-
-                var putEditedComputerToOriginalProduct = await client.PutAsync($"api/computer/{newComputer.Id}",
-                new StringContent(returnEditedComputerToOriginalProduct, Encoding.UTF8, "application/json"));
-                string originalComputerObject = await response.Content.ReadAsStringAsync();
-                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                string getBody = await getmax.Content.ReadAsStringAsync();
+                var newMaxAttendees = JsonConvert.DeserializeObject<List<Computer>>(getBody);
+                Assert.Equal(HttpStatusCode.OK, getmax.StatusCode);
+                Assert.Equal(newMake, newMaxAttendees[0].Make);
             }
         }
+    
 
-        [Fact]
+
+
+[Fact]
         public async Task Test_Delete_Computer()
         {
             using (var client = new APIClientProvider().Client)
