@@ -100,8 +100,27 @@ namespace BangazonSprint.Controllers
 
         // POST: api/Computer
         [HttpPost]
-        public void Post([FromBody] string value)
+        public IActionResult PostProduct([FromBody] Computer newComputer)
         {
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"INSERT INTO Computer
+                                            (PurchaseDate, DecomissionDate, Make, Manufacturer)
+                                        OUTPUT INSERTED.Id
+                                        VALUES (@purchaseDate, @decomissionDate, @make, @manufacturer)";
+                    cmd.Parameters.Add(new SqlParameter("@purchaseDate", newComputer.PurchaseDate));
+                    cmd.Parameters.Add(new SqlParameter("@decomissionDate", newComputer.DecomissionDate));
+                    cmd.Parameters.Add(new SqlParameter("@make", newComputer.Make));
+                    cmd.Parameters.Add(new SqlParameter("@manufacturer", newComputer.Manufacturer));
+
+                    int newId = (int)cmd.ExecuteScalar();
+                    newComputer.Id = newId;
+                    return CreatedAtRoute("GetSingleComputer", new { id = newId }, newComputer);
+                }
+            }
         }
 
         // PUT: api/Computer/5

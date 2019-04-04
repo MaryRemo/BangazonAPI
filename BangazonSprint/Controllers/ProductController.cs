@@ -120,9 +120,7 @@ namespace BangazonSprint.Controllers
                                 LastName = reader.GetString(reader.GetOrdinal("CustomerLastName"))
                             }
                         };
-
                     }
-
                     reader.Close();
                     return Ok(product);
                 }
