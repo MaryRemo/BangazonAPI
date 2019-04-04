@@ -1,7 +1,6 @@
 ﻿// CREATED BY: AB
 
 using BangazonSprint.Models;
-using BangazonSprintStartUp.Models;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -12,7 +11,7 @@ using System.Threading.Tasks;
 using TestBangazonAPI;
 using Xunit;
 
-namespace BangazonSprintStartUp
+namespace BangazonSprint
 {
     public class ProductTypeTest
     {

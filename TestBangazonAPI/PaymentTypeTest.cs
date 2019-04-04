@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 using TestBangazonAPI;
 using Xunit;
 
-namespace BangazonSprintStartUp
+namespace BangazonSprint
 {
     public class PaymentTypeTest
     {
