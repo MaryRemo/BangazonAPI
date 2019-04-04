@@ -17,7 +17,7 @@ namespace TestBangazonAPI
         {
             using (var client = new APIClientProvider().Client)
             {
-               
+
                 var response = await client.GetAsync("/api/TrainingProgram");
 
 
@@ -35,7 +35,7 @@ namespace TestBangazonAPI
 
             using (var client = new APIClientProvider().Client)
             {
-               
+
                 var getOldList = await client.GetAsync("/api/trainingprogram");
                 getOldList.EnsureSuccessStatusCode();
 
@@ -61,7 +61,7 @@ namespace TestBangazonAPI
 
                 string responseBody = await response.Content.ReadAsStringAsync();
 
-            
+
                 var getOrder = await client.GetAsync("/api/trainingprogram");
                 var newProgram = JsonConvert.DeserializeObject<TrainingProgram>(responseBody);
 
@@ -101,7 +101,7 @@ namespace TestBangazonAPI
                 getmax.EnsureSuccessStatusCode();
 
                 string getBody = await getmax.Content.ReadAsStringAsync();
-               var newMaxAttendees = JsonConvert.DeserializeObject<List<TrainingProgram>>(getBody);
+                var newMaxAttendees = JsonConvert.DeserializeObject<List<TrainingProgram>>(getBody);
                 Assert.Equal(HttpStatusCode.OK, getmax.StatusCode);
                 Assert.Equal(newmax, newMaxAttendees[0].MaxAttendees);
             }

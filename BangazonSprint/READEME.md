@@ -306,17 +306,41 @@ To create a new object or edit a specific item already in the database, follow t
 
   The structure of the objects of this controller should look like this:
   ```
-
+      {
+        "id": 1,
+        "purchaseDate": "1999-02-16T00:00:00",
+        "decomissionDate": "1994-05-26T00:00:00",
+        "make": "XPS 13",
+        "manufacturer": "Dell"
+    },
+    {
+        "id": 2,
+        "purchaseDate": "1999-02-16T00:00:00",
+        "decomissionDate": "1994-05-26T00:00:00",
+        "make": "XPS 13",
+        "manufacturer": "Dell"
+    }
 
   ```
    A specific item should look like this:
    ```
-
+       {
+        "id": 2,
+        "purchaseDate": "1999-02-16T00:00:00",
+        "decomissionDate": "1994-05-26T00:00:00",
+        "make": "XPS 13",
+        "manufacturer": "Dell"
+    }
 
    ```
    To create a new object or edit a specific item already in the database, follow the structure below:
    ```
-
+    {
+        "purchaseDate": "1999-02-16T00:00:00",
+        "decomissionDate": "1994-05-26T00:00:00",
+        "make": "XPS 13",
+        "manufacturer": "Dell"
+    }
 
    ```
 
