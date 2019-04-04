@@ -107,6 +107,7 @@ namespace BangazonSprint.Controllers
         }
 
         // GET: api/Department/5
+
         [HttpGet("{id}", Name = "GetSingleDepartment")]
         public IActionResult Get(string include, int id)
         {

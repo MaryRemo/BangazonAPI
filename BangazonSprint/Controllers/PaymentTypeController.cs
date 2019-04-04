@@ -72,6 +72,7 @@ namespace BangazonSprint.Controllers
 
         // GET: api/PaymentType/5
         [HttpGet("{id}", Name = "GetSinglePaymentType")]
+
         public PaymentType Get(int id)
         {
             using (SqlConnection conn = Connection)
