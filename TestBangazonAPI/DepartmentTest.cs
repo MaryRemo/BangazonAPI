@@ -61,14 +61,15 @@ namespace BangazonSprintStartUp
         }
 
         [Fact]
-        public async Task Test_Modify_Department()
+         public async Task Test_Modify_Department()
         {
-            string newName = "Candy";
+            string newName = "Bubblegum";
 
             using (var client = new APIClientProvider().Client)
             {
                 Department modifiedDepartment = new Department
                 {
+                    Id = 1,
                     Name = newName,
                     Budget = 10000
                 };
@@ -86,10 +87,10 @@ namespace BangazonSprintStartUp
                 getCandy.EnsureSuccessStatusCode();
 
                 string getCandyBody = await getCandy.Content.ReadAsStringAsync();
-                Department newCandy = JsonConvert.DeserializeObject<Department>(getCandyBody);
+                Dictionary<int, Department> newCandy = JsonConvert.DeserializeObject<Dictionary<int, Department>>(getCandyBody);
 
                 Assert.Equal(HttpStatusCode.OK, getCandy.StatusCode);
-                Assert.Equal(newName, newCandy.Name);
+                Assert.Equal(newName, newCandy[1].Name);
             }
         }
     }
