@@ -156,8 +156,6 @@ namespace BangazonSprint.Controllers
                     int newId = (int)cmd.ExecuteScalar();
                     newProduct.Id = newId;
                     return CreatedAtRoute("GetSingleProduct", new { id = newId }, newProduct);
-
-                    //? HMN: Doesn't the return need an "await"? See PostProduct on line 165.
                 }
             }
         }

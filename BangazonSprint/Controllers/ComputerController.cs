@@ -122,12 +122,36 @@ namespace BangazonSprint.Controllers
                 }
             }
         }
+        //HMN: manually tested POST and found no errors.
 
         // PUT: api/Computer/5
         [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        public void PutComputer(int id, [FromBody] Computer editedComputer)
         {
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"UPDATE Computer
+                                        SET 
+                                            PurchaseDate = @purchaseDate,
+                                            DecomissionDate = @decomissionDate,
+                                            Make = @make, 
+                                            Manufacturer = @manufacturer
+                                         WHERE Id = @id;";
+
+                    cmd.Parameters.Add(new SqlParameter("@id", id));
+                    cmd.Parameters.Add(new SqlParameter("@purchaseDate", editedComputer.PurchaseDate));
+                    cmd.Parameters.Add(new SqlParameter("@decomissionDate", editedComputer.DecomissionDate));
+                    cmd.Parameters.Add(new SqlParameter("@make", editedComputer.Make));
+                    cmd.Parameters.Add(new SqlParameter("@manufacturer", editedComputer.Manufacturer));
+
+                    cmd.ExecuteNonQuery();
+                }
+            }
         }
+        //HMN: Manually tested PUT and found no errors.
 
         // DELETE: api/ApiWithActions/5
         [HttpDelete("{id}")]
