@@ -35,7 +35,7 @@ namespace BangazonSprint.Controllers
 
         // GET: api/Order?q=socks&include=paymentType
         [HttpGet]
-        public IEnumerable<Order> Get(string include, string q)
+        public IEnumerable<Order> Get(string include, string q, string completed)
         {
             using (SqlConnection conn = Connection)
             {
@@ -46,7 +46,7 @@ namespace BangazonSprint.Controllers
                     {
                         cmd.CommandText = @"
                                     select 
-	                                [Order].Id, [Order].CustomerId, [Order].PaymentTypeId,
+	                                [Order].Id as oId, [Order].CustomerId, [Order].PaymentTypeId,
 	                                PaymentType.Id, PaymentType.[Name], PaymentType.AcctNumber, PaymentType.CustomerId,
 	                                Customer.Id as CustomerID, Customer.FirstName as CustomerFirstName, Customer.LastName as CustomerLastName,
 
@@ -70,7 +70,7 @@ namespace BangazonSprint.Controllers
                     {
                         cmd.CommandText = @"
                                     select 
-	                                [Order].Id, [Order].CustomerId, [Order].PaymentTypeId,
+	                                [Order].Id as oId, [Order].CustomerId as oCID, [Order].PaymentTypeId,
 	                                PaymentType.Id, PaymentType.[Name], PaymentType.AcctNumber, PaymentType.CustomerId,
 	                                Customer.Id as CustomerID, Customer.FirstName as CustomerFirstName, Customer.LastName as CustomerLastName,
 	                                OrderProduct.Id, OrderProduct.OrderId, OrderProduct.ProductId
@@ -84,10 +84,24 @@ namespace BangazonSprint.Controllers
                                     ";
                     }
 
+                    else if (completed == "false")
+                    {
+                        cmd.CommandText = $@"select o.Id as oId, op.Id as opId, p.Id as pId, c.Id as cId, o.CustomerId, o.PaymentTypeId, 
+                                            op.OrderId, op.productId, pt.[Name], pt.AcctNumber, p.Title, p.Price,
+                                            p.[Description], c.FirstName, c.LastName
+                                            from [order] o
+                                            left join paymentType pt on o.PaymentTypeId = pt.Id
+                                            left join OrderProduct op on o.Id = op.OrderId
+                                            left join product p on op.ProductId = p.Id
+                                            left join customer c on o.CustomerId = c.Id
+                                            where o.paymentTypeId is null";
+                    }
+
                     else
                     {
                         cmd.CommandText = @"
-                                         select * from [order]
+                                         select id as oId, customerId, paymenttypeid
+                                            From [Order]
                                          WHERE 1 = 1";
                     }
 
@@ -105,26 +119,41 @@ namespace BangazonSprint.Controllers
                     Dictionary<int, Order> orders = new Dictionary<int, Order>();
                     while (reader.Read())
                     {
-                        int orderId = reader.GetInt32(reader.GetOrdinal("id"));
-                        if (!orders.ContainsKey(orderId))
+                        int orderId = reader.GetInt32(reader.GetOrdinal("oId"));
+
+
+
+
+                        if (completed == "false")
                         {
-                            Order newOrder = new Order
+                            if (reader.IsDBNull(reader.GetOrdinal("PaymentTypeId")))
                             {
-                                id = orderId,
-                                CustomerId = reader.GetInt32(reader.GetOrdinal("CustomerId")),
-                                PaymentTypeId = reader.GetInt32(reader.GetOrdinal("PaymentTypeId")),
+                                if (!orders.ContainsKey(orderId))
+                                {
+                                    Order order = new Order
+                                    {
+                                        id = orderId,
+                                        CustomerId = reader.GetInt32(reader.GetOrdinal("CustomerId"))
+                                    };
+                                    orders.Add(orderId, order);
+                                }
+                            }
+                        }
 
-                            };
-
-                            orders.Add(orderId, newOrder);
-                        } 
-
-                            
-
-                            if (include == "products")
+                        if (include == "products")
                         {
                             if (!reader.IsDBNull(reader.GetOrdinal("productId")))
                             {
+                                if (!orders.ContainsKey(orderId))
+                                {
+                                    Order order = new Order
+                                    {
+                                        id = orderId,
+                                        CustomerId = reader.GetInt32(reader.GetOrdinal("CustomerId"))
+                                    };
+                                    orders.Add(orderId, order);
+                                }
+
                                 Order currentOrder = orders[orderId];
                                 currentOrder.Products.Add(
                                     new Product
@@ -138,10 +167,22 @@ namespace BangazonSprint.Controllers
                                 );
                             }
                         }
-                        if (include == "customers")
+
+                        else if (include == "customers")
                         {
                             if (!reader.IsDBNull(reader.GetOrdinal("CustomerId")))
                             {
+
+                                if (!orders.ContainsKey(orderId))
+                                {
+                                    Order order = new Order
+                                    {
+                                        id = orderId,
+                                        CustomerId = reader.GetInt32(reader.GetOrdinal("CustomerId"))
+                                    };
+                                    orders.Add(orderId, order);
+                                }
+
                                 Order currentOrder = orders[orderId];
                                 currentOrder.Customers.Add(
                                     new Customer
@@ -152,6 +193,57 @@ namespace BangazonSprint.Controllers
                                     }
                                 );
                             }
+
+                            if (reader.IsDBNull(reader.GetOrdinal("CustomerId")))
+                            {
+
+                                if (!orders.ContainsKey(orderId))
+                                {
+                                    Order order = new Order
+                                    {
+                                        id = orderId,
+                                        CustomerId = reader.GetInt32(reader.GetOrdinal("oCID"))
+
+                                    };
+                                    orders.Add(orderId, order);
+                                }
+                            }
+                        }
+
+                        else
+                        {
+                            if  (reader.IsDBNull(reader.GetOrdinal("PaymentTypeId")))
+                            {
+                                if (!orders.ContainsKey(orderId))
+                                {
+                                    Order newOrder = new Order
+                                    {
+                                        id = orderId,
+                                        CustomerId = reader.GetInt32(reader.GetOrdinal("CustomerId"))
+                                    };
+
+                                    orders.Add(orderId, newOrder);
+                                }
+
+                            }
+
+                            if (!reader.IsDBNull(reader.GetOrdinal("PaymentTypeId")))
+                              {
+                                if (!orders.ContainsKey(orderId))
+                                {
+                                    Order newOrder = new Order
+                                    {
+                                        id = orderId,
+                                        CustomerId = reader.GetInt32(reader.GetOrdinal("CustomerId")),
+                                        PaymentTypeId = reader.GetInt32(reader.GetOrdinal("PaymentTypeId"))
+                                    };
+
+                                    orders.Add(orderId, newOrder);
+                                }
+
+                              }
+
+
                         }
                     }
                     reader.Close();
